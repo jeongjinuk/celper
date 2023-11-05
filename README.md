@@ -4,7 +4,10 @@
 ![기본개념](https://user-images.githubusercontent.com/66084125/280513712-db209cb0-0448-4ae3-a72a-2181f64ad3ef.png)
 
 ## 목차
-1. 
+1. [**간단하게 사용해보기**](#-간단하게-사용해보기)
+2. [**더 많이 사용해보기 tutorial**](#-더-많이-사용해보기)
+3. [**지원 어노테이션**](#-지원-어노테이션)
+
 
 ## 간단하게 사용해보기
 ### 목표 스프레드시트
@@ -81,7 +84,7 @@ public class ExcelService {
   - [엑셀의 스타일을 지정하고 싶은데 어떻게 하지? - style](https://github.com/jeongjinuk/celper/tree/main/src/test/java/org/celper/tutorial/style_tutorial)
 
 ---
-## 기능
+## 지원 어노테이션
 <details>
 <summary> @Column </summary> 
 
@@ -129,13 +132,18 @@ public class ExcelService {
 <details>
 <summary> @SheetStyle </summary>
 
-- [tutorial style 부분을 참고하세요](#-더-많이-사용해보기)
+- [**tutorial style 부분을 참고하세요**](#-더-많이-사용해보기)
+
+| 이름  | 주소    | 나이  | 생년월일 |
+|-----|-------|-----|------|
+| 홍길동 | 00001 | 20  |37928.5|
+| 김철수 | 00002 | 23  |36615.5|
 
 ``` java
     // 제공 옵션
     // 스프레드시트에 대한 스타일을 설정해야할 경우 사용할 수 있습니다.
     // 스프레드시트에 대한 스타일을 설정해야할 경우 아래의 SheetStyleConfigurer를 구현하면 됩니다.
-    // 
+    // 헤더, 데이터 영역과 관계없이 모두 적용됩니다.
     Class<? extends SheetStyleConfigurer> value();
     
     ...
@@ -143,4 +151,29 @@ public class ExcelService {
         
 ```
 </details>
+<details>
+<summary> @ColumnStyle </summary>
+
+- [**tutorial style 부분을 참고하세요**](#-더-많이-사용해보기)
+
+| 이름  | 주소    | 나이  | 생년월일 |
+|-----|-------|-----|------|
+| 홍길동 | 00001 | 20  |37928.5|
+| 김철수 | 00002 | 23  |36615.5|
+
+``` java
+    // 제공 옵션
+    
+    // 이름, 주소, 나이, 생년월일에 해당되는 부분의 스타일을 정의할 수 있는 옵션입니다. 
+    Class<? extends CellStyleConfigurer> headerAreaStyle() default _NoCellStyle.class;
+    
+    // 실제 컬럼명에 해당하는 데이터에 스타일을 정의할 수 있는 옵션입니다.
+    Class<? extends CellStyleConfigurer> dataAreaStyle() default _NoCellStyle.class;
+    
+    ...
+    public interface CellStyleConfigurer extends StyleConfigurer<CellStyleBuilder> {}
+```
+</details>
+
+
 
