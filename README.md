@@ -1,6 +1,8 @@
 # celper
-#### *Celper는 java에서 POI를 다룰 때 불편함을 해소하고자 합니다.*
-#### *Celper는 java에서 Excel을 다룰 때 "@" Annotation을 이용한 방법을 제공합니다.*
+***Celper는 java에서 POI를 다룰 때 불편함을 해소하고자 합니다.*** 
+
+***Celper는 java에서 Excel을 다룰 때 "@" Annotation을 이용한 방법을 제공합니다.***
+
 ![기본개념](https://user-images.githubusercontent.com/66084125/280513712-db209cb0-0448-4ae3-a72a-2181f64ad3ef.png)
 
 ## 목차
@@ -8,14 +10,12 @@
 2. [**더 많이 사용해보기 tutorial**](#더-많이-사용해보기)
 3. [**지원 어노테이션**](#지원-어노테이션)
 
-
 ## 간단하게 사용해보기
 ### 목표 스프레드시트
 | 이름  | 주소    | 나이  | 생년월일 |
 |-----|-------|-----|------|
 | 홍길동 | 00001 | 20  |37928.5|
 | 김철수 | 00002 | 23  |36615.5|
-
 ### model
 ```java
 public class StudentModel {
@@ -41,7 +41,7 @@ public class StudentModel {
     // getter,setters ...
 }
 ```
-### Excel Service
+### My Excel Service
 ```java
 public class ExcelService {
 
@@ -83,7 +83,6 @@ public class ExcelService {
   - [컬럼의 삽입순서를 바꾸고 싶은데 어떻게 할까? - priority_option](https://github.com/jeongjinuk/celper/tree/main/src/test/java/org/celper/tutorial/priority_option_tutorial)
   - [엑셀의 스타일을 지정하고 싶은데 어떻게 하지? - style](https://github.com/jeongjinuk/celper/tree/main/src/test/java/org/celper/tutorial/style_tutorial)
 
----
 ## 지원 어노테이션
 <details>
 <summary> @Column </summary> 
@@ -174,6 +173,3 @@ public class ExcelService {
     public interface CellStyleConfigurer extends StyleConfigurer<CellStyleBuilder> {}
 ```
 </details>
-
-
-
