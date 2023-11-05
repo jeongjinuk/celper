@@ -3,9 +3,10 @@
 #### *Celper는 java에서 Excel을 다룰 때 "@" Annotation을 이용한 방법을 제공합니다.*
 ![기본개념](https://user-images.githubusercontent.com/66084125/280513712-db209cb0-0448-4ae3-a72a-2181f64ad3ef.png)
 
-## 간단하게 사용해보기
+## 목차
+1. 
 
----
+## 간단하게 사용해보기
 ### 목표 스프레드시트
 | 이름  | 주소    | 나이  | 생년월일 |
 |-----|-------|-----|------|
@@ -81,7 +82,65 @@ public class ExcelService {
 
 ---
 ## 기능
-| 이름  | 주소    | 나이  | 생년월일 |
-|-----|-------|-----|------|
-| 홍길동 | 00001 | 20  |37928.5|
-| 김철수 | 00002 | 23  |36615.5|
+<details>
+<summary> @Column </summary> 
+
+``` java
+    // 제공 옵션 및 설명
+    // importNameOptions은 가장 먼저 찾게된 컬럼명을 기준으로 매핑작업을 진행합니다.
+    // 그로인하여 하나의 스프레드시트에 여러개의 동일 컬럼이 존재할 경우 원하지 않는 결과가 나올 수 있습니다.
+    
+    // 기본 컬럼명을 정의할 수 있습니다.
+    String value(); 
+    
+    // 스프레드시트에서 DTO 모델 매핑 시 컬럼명이 달라질 경우 사용할 수 있습니다.
+    String[] importNameOptions() default {""};
+    
+     // 스프레드시트에 컬럼 삽입 우선순위를 지정할 수 있습니다. 높을 수록 가장 먼저 삽입됩니다. 만약 우선순위가 같다면 컬럼명을 기준으로 우선순위를 정합니다. 
+    int priority() default 0;
+```
+</details>
+<details>
+<summary> @CellFormat </summary>
+
+``` java
+    // 제공 옵션 및 설명
+    // 만약 customFormat과 builtinFormat을 동시에 지정할 경우 customFormat이 적용됩니다.
+     
+    // 기본적으로 제공하는 format을 이용할 수 있습니다.
+    BuiltinCellFormatType builtinFormat() default BuiltinCellFormatType.GENERAL;
+    
+    // 커스텀한 format을 제작할 수 있습니다.
+    String customFormat() default "";
+```
+</details>
+<details>
+<summary> @DefaultValue </summary>
+
+``` java
+    // 제공 옵션 및 설명
+    // 만약 숫자일 경우 삽입되지 않습니다.
+    // 이유는 null은 존재하지 않는 객체일 경우로 판단이 가능하지만, 숫자의 경우 double로 치환하는 과정에서 0이 됩니다.
+     
+    // null이 발생할 경우 대치되는 문자를 미리 지정할 수 있습니다.
+    String value();
+```
+</details>
+<details>
+<summary> @SheetStyle </summary>
+
+- [tutorial style 부분을 참고하세요](##더-많이-사용해보기)
+
+``` java
+    // 제공 옵션
+    // 스프레드시트에 대한 스타일을 설정해야할 경우 사용할 수 있습니다.
+    // 스프레드시트에 대한 스타일을 설정해야할 경우 아래의 SheetStyleConfigurer를 구현하면 됩니다.
+    // 
+    Class<? extends SheetStyleConfigurer> value();
+    
+    ...
+    public interface SheetStyleConfigurer extends StyleConfigurer<SheetStyleBuilder> {}
+        
+```
+</details>
+
