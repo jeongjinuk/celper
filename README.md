@@ -131,7 +131,7 @@ public class ExcelService {
 <details>
 <summary> @SheetStyle </summary>
 
-- [**tutorial style 부분을 참고하세요**](#-더-많이-사용해보기)
+- [**tutorials "엑셀의 스타일을 지정하고 싶은데 어떻게 하지?" 부분을 참고하세요**](#더-많이-사용해보기)
 
 | 이름  | 주소    | 나이  | 생년월일 |
 |-----|-------|-----|------|
@@ -153,7 +153,7 @@ public class ExcelService {
 <details>
 <summary> @ColumnStyle </summary>
 
-- [**tutorial style 부분을 참고하세요**](#-더-많이-사용해보기)
+- [**tutorials "엑셀의 스타일을 지정하고 싶은데 어떻게 하지?" 부분을 참고하세요**](#더-많이-사용해보기)
 
 | 이름  | 주소    | 나이  | 생년월일 |
 |-----|-------|-----|------|
