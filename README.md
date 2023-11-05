@@ -129,7 +129,7 @@ public class ExcelService {
 <details>
 <summary> @SheetStyle </summary>
 
-- [tutorial style 부분을 참고하세요](##더-많이-사용해보기)
+- [tutorial style 부분을 참고하세요](#-더-많이-사용해보기)
 
 ``` java
     // 제공 옵션
