@@ -9,6 +9,7 @@ import org.celper.core.style.builder.CellStyleBuilder;
 import org.celper.core.style.builder.SheetStyleBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -121,7 +122,7 @@ public class ColumnFrame implements Comparable<ColumnFrame> {
         List<String> titles = new ArrayList<>();
         titles.add(this.classModel.getColumn().value());
         if (!"".equals(this.classModel.getColumn().importNameOptions()[0])) {
-            titles.addAll(List.of(this.classModel.getColumn().importNameOptions()));
+            titles.addAll(Arrays.asList(this.classModel.getColumn().importNameOptions()));
         }
         return titles;
     }

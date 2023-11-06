@@ -2,6 +2,7 @@ package org.celper.core;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.celper.exception.EmptySheetException;
 import org.celper.type.WorkBookType;
 
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class ExcelWorkBook {
         return this.sheets.stream()
                 .filter(excelSheet -> name.equals(excelSheet.getName()))
                 .findAny()
-                .orElseThrow();
+                .orElseThrow(() -> new EmptySheetException(String.format("%s 의 시트는 존재하지 않습니다.", name)));
     }
 
     /**

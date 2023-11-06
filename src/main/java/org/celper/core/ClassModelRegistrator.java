@@ -6,6 +6,7 @@ import org.celper.core.style.SheetStyleConfigurer;
 import org.celper.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,7 +29,7 @@ public final class ClassModelRegistrator {
      * @param clazz the clazz
      */
     public static void add(Class<?> clazz) {
-        CLASS_MODEL_MAP.put(clazz, List.of(createClassModels(clazz)));
+        CLASS_MODEL_MAP.put(clazz, Arrays.asList(createClassModels(clazz)));
     }
 
     /**
@@ -39,7 +40,7 @@ public final class ClassModelRegistrator {
      */
     static List<ClassModel> getOrDefault(Class<?> clazz) {
         List<ClassModel> classModels = CLASS_MODEL_MAP.get(clazz);
-        return  Objects.nonNull(classModels) ? classModels : List.of(createClassModels(clazz));
+        return  Objects.nonNull(classModels) ? classModels : Arrays.asList(createClassModels(clazz));
     }
 
     /**

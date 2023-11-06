@@ -99,7 +99,7 @@ public final class CellUtils {
         } else if (o instanceof LocalDate) {
             cell.setCellValue(LocalDateTime.of((LocalDate) o, LocalTime.NOON));
         } else if (o instanceof LocalTime) {
-            cell.setCellValue(LocalDateTime.of(LocalDate.EPOCH, (LocalTime) o));
+            cell.setCellValue(LocalDateTime.of(LocalDate.MIN, (LocalTime) o));
         } else {
             cell.setCellValue(String.valueOf(o));
         }
