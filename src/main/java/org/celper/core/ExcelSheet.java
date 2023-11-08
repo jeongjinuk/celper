@@ -9,7 +9,9 @@ import org.celper.util.ModelMapperFactory;
 import org.modelmapper.ModelMapper;
 
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -53,21 +55,22 @@ public class ExcelSheet {
 
     /**
      * Model to sheet.
-     *
+     * List가 비어있거나, null 배열일 경우 DataListEmptyException를 반환합니다.
      * @param <T>   the type parameter
      * @param model the model
+     * @throws DataListEmptyException
      */
-// API 제공 메서드
     public <T> void modelToSheet(List<T> model){
         modelToSheet(header -> false, model);
     }
 
     /**
      * Model to sheet.
-     *
+     * List가 비어있거나, null 배열일 경우 DataListEmptyException를 반환합니다.
      * @param <T>            the type parameter
      * @param excludedHeader the excluded header
      * @param model          the model
+     * @throws DataListEmptyException
      */
     public <T> void modelToSheet(Predicate<String> excludedHeader, List<T> model) {
         if (Objects.isNull(model) || model.isEmpty()) {
@@ -86,8 +89,9 @@ public class ExcelSheet {
 
     /**
      * Multi model to sheet.
-     *
+     * null 배열일 경우 DataListEmptyException를 반환합니다.
      * @param modelLists the model lists
+     * @throws DataListEmptyException
      */
     public void multiModelToSheet(List<?>... modelLists) {
         multiModelToSheet(s -> false, modelLists);
@@ -95,9 +99,10 @@ public class ExcelSheet {
 
     /**
      * Multi model to sheet.
-     *
+     * null 배열일 경우 DataListEmptyException를 반환합니다.
      * @param excludedHeader the excluded header
      * @param modelLists     the model lists
+     * @throws DataListEmptyException
      */
     public void multiModelToSheet(Predicate<String> excludedHeader, List<?>... modelLists) {
         for (List<?> modelList : modelLists) {
@@ -120,10 +125,13 @@ public class ExcelSheet {
 
     /**
      * Sheet to model list.
+     * 만약 매칭되는 필드가 존재하지 않을 경우 NoSuchFieldException을 반환합니다.
      *
      * @param <T>   the type parameter
      * @param clazz the clazz
      * @return the list
+     * @throws NoSuchFieldException
+     *
      */
     public <T> List<T> sheetToModel(Class<T> clazz) {
         ModelMapper modelMapper = ModelMapperFactory.defaultModelMapper(); // Model Mapper 가져오기
@@ -150,21 +158,22 @@ public class ExcelSheet {
         IntConsumer setStyle = colIdx -> headerRow.getCell(colIdx).setCellStyle(columnFrames.get(colIdx).getHeaderAreaCellStyle());
         write(columnFrames, setHeader, setStyle);
     }
+
     private void multiModelDataWrite(List<ColumnFrame> columnFrames, int rowIndex, Object[] model) {
         Stream.of(model).forEach(o -> dataWrite(columnFrames, rowIndex, o));
     }
+
     private void dataWrite(List<ColumnFrame> columnFrames, int rowIndex, Object o) {
         Row row = CellUtils.createRow(this.sheet, rowIndex, columnFrames.size());
         IntConsumer setValue = colIdx -> CellUtils.setValue(columnFrames.get(colIdx), row.getCell(colIdx), o);
         IntConsumer setStyle = colIdx -> row.getCell(colIdx).setCellStyle(columnFrames.get(colIdx).getDataAreaCellStyle());
         write(columnFrames, setValue, setStyle);
     }
+
     private void write(List<ColumnFrame> columnFrames, IntConsumer setValue, IntConsumer setStyle) {
         IntConsumer consumer = setValue.andThen(setStyle);
         IntStream.range(0, columnFrames.size()).forEach(consumer);
     }
-
-
 
 
     private List<Object[]> convertMultiModel(List<?>[] modelLists) {
@@ -182,6 +191,7 @@ public class ExcelSheet {
         }
         return convertModel;
     }
+
     private List<ColumnFrame> convertImportColumnFrames(List<ColumnFrame> columnFrames) {
         List<ColumnFrame> newList = new ArrayList<>(columnFrames.size());
         int searchRowRange = Math.min(this.sheet.getLastRowNum(), 100);
@@ -195,6 +205,7 @@ public class ExcelSheet {
         }
         return newList;
     }
+
     private void add(List<ColumnFrame> columnFrames, List<ColumnFrame> newList,Cell cell) {
         for (ColumnFrame frame : columnFrames) {
             if (frame.getImportNameOptions().contains(CellUtils.getValue(cell).toString().trim())) {
@@ -212,20 +223,11 @@ public class ExcelSheet {
                 .flatMap(classModels -> createColumnFrames(classModels, excludedHeader, ColumnFrame :: setNonSheetStyle))
                 .collect(Collectors.toList());
     }
+
     private List<ColumnFrame> createColumnFrames(Predicate<String> excludedHeader, List<ClassModel> classModels) {
         return createColumnFrames(classModels, excludedHeader, frame -> frame.setSheetStyle(this.sheet))
                 .collect(Collectors.toList());
     }
-    private Map<String, Object> createModelMap(List<ColumnFrame> columnFrames, int rowIndex) {
-        return columnFrames.stream()
-                .filter(ColumnFrame :: isExistColumn)
-                .collect(Collectors.toMap(
-                                frame -> frame.getClassModel().getFieldName(),
-                                frame -> CellUtils.getValue(this.sheet, rowIndex, frame.getHeaderColumnPosition())
-                        )
-                );
-    }
-
 
     private Stream<ColumnFrame> createColumnFrames(List<ClassModel> classModels,
                                                    Predicate<String> excludedHeader,
@@ -242,5 +244,15 @@ public class ExcelSheet {
                     return columnFrame;
                 })
                 .sorted();
+    }
+
+    private Map<String, Object> createModelMap(List<ColumnFrame> columnFrames, int rowIndex) {
+        return columnFrames.stream()
+                .filter(ColumnFrame :: isExistColumn)
+                .collect(Collectors.toMap(
+                                frame -> frame.getClassModel().getFieldName(),
+                                frame -> CellUtils.getValue(this.sheet, rowIndex, frame.getHeaderColumnPosition())
+                        )
+                );
     }
 }
