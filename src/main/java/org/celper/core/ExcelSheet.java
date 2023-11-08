@@ -9,9 +9,7 @@ import org.celper.util.ModelMapperFactory;
 import org.modelmapper.ModelMapper;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.IntConsumer;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -145,15 +143,7 @@ public class ExcelSheet {
                 .collect(Collectors.toList());
     }
 
-    private void add(List<ColumnFrame> columnFrames, List<ColumnFrame> newList,Cell cell) {
-        for (ColumnFrame frame : columnFrames) {
-            if (frame.getImportNameOptions().contains(CellUtils.getValue(cell).toString().trim())) {
-                columnFrames.remove(frame);
-                newList.add(frame.createImportOnlyColumnFrame(cell.getRowIndex(), cell.getColumnIndex()));
-                return;
-            }
-        }
-    }
+    // render로 바꾸는게 좋아보임
     private void headerWrite(List<ColumnFrame> columnFrames, int rowIndex) {
         Row headerRow = CellUtils.createRow(this.sheet, rowIndex, columnFrames.size());
         IntConsumer setHeader = colIdx -> CellUtils.setValue(headerRow.getCell(colIdx), columnFrames.get(colIdx).getClassModel().getColumn().value());
@@ -161,8 +151,7 @@ public class ExcelSheet {
         write(columnFrames, setHeader, setStyle);
     }
     private void multiModelDataWrite(List<ColumnFrame> columnFrames, int rowIndex, Object[] model) {
-        Stream.of(model)
-                .forEach(o -> dataWrite(columnFrames, rowIndex, o));
+        Stream.of(model).forEach(o -> dataWrite(columnFrames, rowIndex, o));
     }
     private void dataWrite(List<ColumnFrame> columnFrames, int rowIndex, Object o) {
         Row row = CellUtils.createRow(this.sheet, rowIndex, columnFrames.size());
@@ -171,10 +160,11 @@ public class ExcelSheet {
         write(columnFrames, setValue, setStyle);
     }
     private void write(List<ColumnFrame> columnFrames, IntConsumer setValue, IntConsumer setStyle) {
-        IntStream.range(0, columnFrames.size())
-                .peek(setValue)
-                .forEach(setStyle);
+        IntConsumer consumer = setValue.andThen(setStyle);
+        IntStream.range(0, columnFrames.size()).forEach(consumer);
     }
+
+
 
 
     private List<Object[]> convertMultiModel(List<?>[] modelLists) {
@@ -192,24 +182,6 @@ public class ExcelSheet {
         }
         return convertModel;
     }
-    private List<ColumnFrame> createMultiColumnFrames(Predicate<String> excludedHeader, List<Object[]> multiModel) {
-        return Stream.of(multiModel.get(0))
-                .map(o -> ClassModelRegistrator.getOrDefault(o.getClass()))
-                .flatMap(classModels -> createColumnFrames(classModels, ColumnFrame :: setNonSheetStyle))
-                .filter(columnFrame -> excludedHeader
-                        .negate()
-                        .test(columnFrame.getClassModel().getColumn().value()))
-                .collect(Collectors.toList());
-    }
-    private Map<String, Object> createModelMap(List<ColumnFrame> columnFrames, int rowIndex) {
-        return columnFrames.stream()
-                .filter(ColumnFrame :: isExistColumn)
-                .collect(Collectors.toMap(
-                                frame -> frame.getClassModel().getFieldName(),
-                                frame -> CellUtils.getValue(this.sheet, rowIndex, frame.getHeaderColumnPosition())
-                        )
-                );
-    }
     private List<ColumnFrame> convertImportColumnFrameList(List<ColumnFrame> columnFrames) {
         List<ColumnFrame> newList = new ArrayList<>(columnFrames.size());
         int searchRowRange = Math.min(this.sheet.getLastRowNum(), 100);
@@ -223,21 +195,52 @@ public class ExcelSheet {
         }
         return newList;
     }
+    private void add(List<ColumnFrame> columnFrames, List<ColumnFrame> newList,Cell cell) {
+        for (ColumnFrame frame : columnFrames) {
+            if (frame.getImportNameOptions().contains(CellUtils.getValue(cell).toString().trim())) {
+                columnFrames.remove(frame);
+                newList.add(frame.createImportOnlyColumnFrame(cell.getRowIndex(), cell.getColumnIndex()));
+                return;
+            }
+        }
+    }
 
 
+    private List<ColumnFrame> createMultiColumnFrames(Predicate<String> excludedHeader, List<Object[]> multiModel) {
+        return Stream.of(multiModel.get(0))
+                .map(o -> ClassModelRegistrator.getOrDefault(o.getClass()))
+                .flatMap(classModels -> createColumnFrames(classModels, excludedHeader, ColumnFrame :: setNonSheetStyle))
+                .collect(Collectors.toList());
+    }
     private List<ColumnFrame> createColumnFrames(Predicate<String> excludedHeader, List<ClassModel> classModels) {
-        return createColumnFrames(classModels, frame -> frame.setSheetStyle(this.sheet))
+        return createColumnFrames(classModels, excludedHeader, frame -> frame.setSheetStyle(this.sheet))
+                .collect(Collectors.toList());
+    }
+    private Map<String, Object> createModelMap(List<ColumnFrame> columnFrames, int rowIndex) {
+        return columnFrames.stream()
+                .filter(ColumnFrame :: isExistColumn)
+                .collect(Collectors.toMap(
+                                frame -> frame.getClassModel().getFieldName(),
+                                frame -> CellUtils.getValue(this.sheet, rowIndex, frame.getHeaderColumnPosition())
+                        )
+                );
+    }
+
+
+    private Stream<ColumnFrame> createColumnFrames(List<ClassModel> classModels,
+                                                   Predicate<String> excludedHeader,
+                                                   Consumer<ColumnFrame> sheetStyleConsumer) {
+        Consumer<ColumnFrame> consumer = sheetStyleConsumer.andThen(ColumnFrame :: setColumnStyle);
+
+        return classModels.stream()
+                .map(classModel -> new ColumnFrame(this._wb, classModel))
                 .filter(columnFrame -> excludedHeader
                         .negate()
                         .test(columnFrame.getClassModel().getColumn().value()))
-                .collect(Collectors.toList());
-    }
-    private Stream<ColumnFrame> createColumnFrames(List<ClassModel> classModels, Consumer<ColumnFrame> sheetStyleConsumer) {
-        return classModels.stream()
-                .map(classModel -> new ColumnFrame(this._wb, classModel))
-                .peek(sheetStyleConsumer)
-                .peek(ColumnFrame :: setColumnStyle)
+                .map(columnFrame -> {
+                    consumer.accept(columnFrame);
+                    return columnFrame;
+                })
                 .sorted();
     }
-
 }
