@@ -129,7 +129,7 @@ public class ExcelSheet {
         ModelMapper modelMapper = ModelMapperFactory.defaultModelMapper(); // Model Mapper 가져오기
 
         List<ColumnFrame> columnFrames = createColumnFrames(header -> false, ClassModelRegistrator.getOrDefault(clazz));
-        List<ColumnFrame> importList = convertImportColumnFrameList(columnFrames);
+        List<ColumnFrame> importList = convertImportColumnFrames(columnFrames);
 
         int startRow = importList.stream()// 병합을 고려해서 startRow 추출 병합 고려할려면 isMerged 만들어야함
                 .max(ColumnFrame :: compareRowPosition)
@@ -182,7 +182,7 @@ public class ExcelSheet {
         }
         return convertModel;
     }
-    private List<ColumnFrame> convertImportColumnFrameList(List<ColumnFrame> columnFrames) {
+    private List<ColumnFrame> convertImportColumnFrames(List<ColumnFrame> columnFrames) {
         List<ColumnFrame> newList = new ArrayList<>(columnFrames.size());
         int searchRowRange = Math.min(this.sheet.getLastRowNum(), 100);
         for (int i = 0; i < searchRowRange; i++) {
