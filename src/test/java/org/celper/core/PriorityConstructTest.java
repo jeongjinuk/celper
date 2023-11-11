@@ -3,6 +3,7 @@ package org.celper.core;
 import org.apache.poi.ss.usermodel.Row;
 import org.celper.annotations.Column;
 import org.celper.type.WorkBookType;
+import org.celper.util.StructureRegistrator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -43,8 +44,10 @@ class PriorityConstructTest {
         List<DTO> datas = new ArrayList<>();
         DTO dto = new DTO("val1", "val2", "val3", "val4");
         datas.add(dto);
+        StructureRegistrator structureRegistrator = new StructureRegistrator();
+        structureRegistrator.add(DTO.class);
 
-        ExcelWorkBook excelWorkBook = new ExcelWorkBook(WorkBookType.XSSF);
+        ExcelWorkBook excelWorkBook = new ExcelWorkBook(WorkBookType.XSSF, structureRegistrator);
         excelWorkBook.createSheet().modelToSheet(datas);
 
         ExcelSheet result = excelWorkBook.getSheetAt(0);

@@ -1,11 +1,12 @@
 package org.celper.core;
 
 import org.apache.poi.ss.usermodel.*;
-import org.celper.core.model.ClassModel;
-import org.celper.core.model.ColumnFrame;
+import org.celper.core.structure.ColumnStructure;
+import org.celper.core.structure.Structure;
 import org.celper.exception.DataListEmptyException;
 import org.celper.exception.NoSuchFieldException;
 import org.celper.util.ModelMapperFactory;
+import org.celper.util.StructureRegistrator;
 import org.modelmapper.ModelMapper;
 
 import java.util.*;
@@ -17,93 +18,48 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-/**
- * The type Excel sheet.
- */
 public class ExcelSheet {
     private final Workbook _wb;
     private final Sheet sheet;
+    private final StructureRegistrator structureRegistrator;
 
-    /**
-     * Instantiates a new Excel sheet.
-     *
-     * @param workbook the workbook
-     * @param sheet    the sheet
-     */
-    public ExcelSheet(Workbook workbook, Sheet sheet) {
+    public ExcelSheet(Workbook workbook, Sheet sheet, StructureRegistrator structureRegistrator) {
         this._wb = workbook;
         this.sheet = sheet;
+        this.structureRegistrator = structureRegistrator;
     }
 
-    /**
-     * Gets name.
-     *
-     * @return the name
-     */
     public String getName() {
         return this.sheet.getSheetName();
     }
 
-    /**
-     * Gets sheet.
-     *
-     * @return the sheet
-     */
     public Sheet getSheet() {
         return this.sheet;
     }
 
-    /**
-     * Model to sheet.
-     * List가 비어있거나, null 배열일 경우 DataListEmptyException를 반환합니다.
-     * @param <T>   the type parameter
-     * @param model the model
-     * @throws DataListEmptyException
-     */
-    public <T> void modelToSheet(List<T> model){
+    public <T> void modelToSheet(List<T> model) {
         modelToSheet(header -> false, model);
     }
 
-    /**
-     * Model to sheet.
-     * List가 비어있거나, null 배열일 경우 DataListEmptyException를 반환합니다.
-     * @param <T>            the type parameter
-     * @param excludedHeader the excluded header
-     * @param model          the model
-     * @throws DataListEmptyException
-     */
     public <T> void modelToSheet(Predicate<String> excludedHeader, List<T> model) {
         if (Objects.isNull(model) || model.isEmpty()) {
             throw new DataListEmptyException("data list is empty exception");
         }
-        List<ColumnFrame> columnFrames = createColumnFrames(excludedHeader, ClassModelRegistrator.getOrDefault(model.get(0).getClass()));
+        List<ColumnStructure> columnStructures = createColumnStructures(excludedHeader, structureRegistrator.getOrDefault(model.get(0).getClass()));
 
         int headerRowIndex = 0;
         int dataRow = headerRowIndex + 1;
         int modelSize = model.size();
 
-        headerWrite(columnFrames, headerRowIndex);
+        headerWrite(columnStructures, headerRowIndex);
         IntStream.rangeClosed(dataRow, modelSize)
-                .forEach(rowIndex -> dataWrite(columnFrames, rowIndex, model.get(rowIndex - 1)));
+                .forEach(rowIndex -> dataWrite(columnStructures, rowIndex, model.get(rowIndex - 1)));
     }
 
-    /**
-     * Multi model to sheet.
-     * null 배열일 경우 DataListEmptyException를 반환합니다.
-     * @param modelLists the model lists
-     * @throws DataListEmptyException
-     */
     public void multiModelToSheet(List<?>... modelLists) {
         multiModelToSheet(s -> false, modelLists);
     }
 
-    /**
-     * Multi model to sheet.
-     * null 배열일 경우 DataListEmptyException를 반환합니다.
-     * @param excludedHeader the excluded header
-     * @param modelLists     the model lists
-     * @throws DataListEmptyException
-     */
     public void multiModelToSheet(Predicate<String> excludedHeader, List<?>... modelLists) {
         for (List<?> modelList : modelLists) {
             if (Objects.isNull(modelList)) {
@@ -112,35 +68,25 @@ public class ExcelSheet {
         }
 
         List<Object[]> multiModel = convertMultiModel(modelLists);
-        List<ColumnFrame> multiColumnFrames = createMultiColumnFrames(excludedHeader, multiModel);
+        List<ColumnStructure> multiColumnStructures = createMultiColumnStructures(excludedHeader, multiModel);
 
         int headerRowIndex = 0;
         int dataRow = headerRowIndex + 1;
         int multiModelSize = multiModel.size();
 
-        headerWrite(multiColumnFrames, headerRowIndex);
+        headerWrite(multiColumnStructures, headerRowIndex);
         IntStream.rangeClosed(dataRow, multiModelSize)
-                .forEach(rowIndex -> multiModelDataWrite(multiColumnFrames, rowIndex, multiModel.get(rowIndex - 1)));
+                .forEach(rowIndex -> multiModelDataWrite(multiColumnStructures, rowIndex, multiModel.get(rowIndex - 1)));
     }
 
-    /**
-     * Sheet to model list.
-     * 만약 매칭되는 필드가 존재하지 않을 경우 NoSuchFieldException을 반환합니다.
-     *
-     * @param <T>   the type parameter
-     * @param clazz the clazz
-     * @return the list
-     * @throws NoSuchFieldException
-     *
-     */
     public <T> List<T> sheetToModel(Class<T> clazz) {
         ModelMapper modelMapper = ModelMapperFactory.defaultModelMapper(); // Model Mapper 가져오기
 
-        List<ColumnFrame> columnFrames = createColumnFrames(header -> false, ClassModelRegistrator.getOrDefault(clazz));
-        List<ColumnFrame> importList = convertImportColumnFrames(columnFrames);
+        List<ColumnStructure> columnStructures = createColumnStructures(header -> false, structureRegistrator.getOrDefault(clazz));
+        List<ColumnStructure> importList = convertImportColumnStructures(columnStructures);
 
         int startRow = importList.stream()// 병합을 고려해서 startRow 추출 병합 고려할려면 isMerged 만들어야함
-                .max(ColumnFrame :: compareRowPosition)
+                .max(ColumnStructure :: compareRowPosition)
                 .orElseThrow(() -> new NoSuchFieldException(String.format("'%s' 시트에 매칭된 필드가 없습니다.", this.sheet.getSheetName())))
                 .getHeaderRowPosition() + 1;
 
@@ -151,28 +97,28 @@ public class ExcelSheet {
                 .collect(Collectors.toList());
     }
 
-    // render로 바꾸는게 좋아보임
-    private void headerWrite(List<ColumnFrame> columnFrames, int rowIndex) {
-        Row headerRow = CellUtils.createRow(this.sheet, rowIndex, columnFrames.size());
-        IntConsumer setHeader = colIdx -> CellUtils.setValue(headerRow.getCell(colIdx), columnFrames.get(colIdx).getClassModel().getColumn().value());
-        IntConsumer setStyle = colIdx -> headerRow.getCell(colIdx).setCellStyle(columnFrames.get(colIdx).getHeaderAreaCellStyle());
-        write(columnFrames, setHeader, setStyle);
+
+    private void headerWrite(List<ColumnStructure> columnStructures, int rowIndex) {
+        Row headerRow = CellUtils.createRow(this.sheet, rowIndex, columnStructures.size());
+        IntConsumer setHeader = colIdx -> CellUtils.setValue(headerRow.getCell(colIdx), columnStructures.get(colIdx).getStructure().getColumn().value());
+        IntConsumer setStyle = colIdx -> headerRow.getCell(colIdx).setCellStyle(columnStructures.get(colIdx).getHeaderAreaCellStyle());
+        write(columnStructures, setHeader, setStyle);
     }
 
-    private void multiModelDataWrite(List<ColumnFrame> columnFrames, int rowIndex, Object[] model) {
-        Stream.of(model).forEach(o -> dataWrite(columnFrames, rowIndex, o));
+    private void multiModelDataWrite(List<ColumnStructure> columnStructures, int rowIndex, Object[] model) {
+        Stream.of(model).forEach(o -> dataWrite(columnStructures, rowIndex, o));
     }
 
-    private void dataWrite(List<ColumnFrame> columnFrames, int rowIndex, Object o) {
-        Row row = CellUtils.createRow(this.sheet, rowIndex, columnFrames.size());
-        IntConsumer setValue = colIdx -> CellUtils.setValue(columnFrames.get(colIdx), row.getCell(colIdx), o);
-        IntConsumer setStyle = colIdx -> row.getCell(colIdx).setCellStyle(columnFrames.get(colIdx).getDataAreaCellStyle());
-        write(columnFrames, setValue, setStyle);
+    private void dataWrite(List<ColumnStructure> columnStructures, int rowIndex, Object o) {
+        Row row = CellUtils.createRow(this.sheet, rowIndex, columnStructures.size());
+        IntConsumer setValue = colIdx -> CellUtils.setValue(columnStructures.get(colIdx), row.getCell(colIdx), o);
+        IntConsumer setStyle = colIdx -> row.getCell(colIdx).setCellStyle(columnStructures.get(colIdx).getDataAreaCellStyle());
+        write(columnStructures, setValue, setStyle);
     }
 
-    private void write(List<ColumnFrame> columnFrames, IntConsumer setValue, IntConsumer setStyle) {
+    private void write(List<ColumnStructure> columnStructures, IntConsumer setValue, IntConsumer setStyle) {
         IntConsumer consumer = setValue.andThen(setStyle);
-        IntStream.range(0, columnFrames.size()).forEach(consumer);
+        IntStream.range(0, columnStructures.size()).forEach(consumer);
     }
 
 
@@ -192,66 +138,66 @@ public class ExcelSheet {
         return convertModel;
     }
 
-    private List<ColumnFrame> convertImportColumnFrames(List<ColumnFrame> columnFrames) {
-        List<ColumnFrame> newList = new ArrayList<>(columnFrames.size());
+    private List<ColumnStructure> convertImportColumnStructures(List<ColumnStructure> columnStructures) {
+        List<ColumnStructure> newList = new ArrayList<>(columnStructures.size());
         int searchRowRange = Math.min(this.sheet.getLastRowNum(), 100);
         for (int i = 0; i < searchRowRange; i++) {
             Stream.of(this.sheet.getRow(i))
-                    .filter(Objects::nonNull)
+                    .filter(Objects :: nonNull)
                     .flatMap(row -> StreamSupport.stream(row.spliterator(), false))
-                    .filter(Objects::nonNull)
+                    .filter(Objects :: nonNull)
                     .filter(cell -> cell.getCellType() == CellType.STRING)
-                    .forEach(cell -> add(columnFrames, newList, cell));
+                    .forEach(cell -> add(columnStructures, newList, cell));
         }
         return newList;
     }
 
-    private void add(List<ColumnFrame> columnFrames, List<ColumnFrame> newList,Cell cell) {
-        for (ColumnFrame frame : columnFrames) {
-            if (frame.getImportNameOptions().contains(CellUtils.getValue(cell).toString().trim())) {
-                columnFrames.remove(frame);
-                newList.add(frame.createImportOnlyColumnFrame(cell.getRowIndex(), cell.getColumnIndex()));
+    private void add(List<ColumnStructure> columnStructures, List<ColumnStructure> newList, Cell cell) {
+        for (ColumnStructure structure : columnStructures) {
+            if (structure.getImportNameOptions().contains(CellUtils.getValue(cell).toString().trim())) {
+                columnStructures.remove(structure);
+                newList.add(structure.newColumnStructure(cell.getRowIndex(), cell.getColumnIndex()));
                 return;
             }
         }
     }
 
 
-    private List<ColumnFrame> createMultiColumnFrames(Predicate<String> excludedHeader, List<Object[]> multiModel) {
+    private List<ColumnStructure> createMultiColumnStructures(Predicate<String> excludedHeader, List<Object[]> multiModel) {
         return Stream.of(multiModel.get(0))
-                .map(o -> ClassModelRegistrator.getOrDefault(o.getClass()))
-                .flatMap(classModels -> createColumnFrames(classModels, excludedHeader, ColumnFrame :: setNonSheetStyle))
+                .map(o -> structureRegistrator.getOrDefault(o.getClass()))
+                .flatMap(structure -> createColumnStructures(structure, excludedHeader, ColumnStructure :: setNonSheetStyle))
                 .collect(Collectors.toList());
     }
 
-    private List<ColumnFrame> createColumnFrames(Predicate<String> excludedHeader, List<ClassModel> classModels) {
-        return createColumnFrames(classModels, excludedHeader, frame -> frame.setSheetStyle(this.sheet))
+    private List<ColumnStructure> createColumnStructures(Predicate<String> excludedHeader, List<Structure> structures) {
+        return createColumnStructures(structures, excludedHeader, structure -> structure.setSheetStyle(this.sheet))
                 .collect(Collectors.toList());
     }
 
-    private Stream<ColumnFrame> createColumnFrames(List<ClassModel> classModels,
-                                                   Predicate<String> excludedHeader,
-                                                   Consumer<ColumnFrame> sheetStyleConsumer) {
-        Consumer<ColumnFrame> consumer = sheetStyleConsumer.andThen(ColumnFrame :: setColumnStyle);
+    private Stream<ColumnStructure> createColumnStructures(List<Structure> structures,
+                                                           Predicate<String> excludedHeader,
+                                                           Consumer<ColumnStructure> sheetStyleConsumer) {
+        Consumer<ColumnStructure> consumer = sheetStyleConsumer.andThen(ColumnStructure :: setColumnStyle);
 
-        return classModels.stream()
-                .map(classModel -> new ColumnFrame(this._wb, classModel))
-                .filter(columnFrame -> excludedHeader
+        return structures.stream()
+                .map(structure -> new ColumnStructure(this._wb, structure))
+                .filter(columnStructure -> excludedHeader
                         .negate()
-                        .test(columnFrame.getClassModel().getColumn().value()))
-                .map(columnFrame -> {
-                    consumer.accept(columnFrame);
-                    return columnFrame;
+                        .test(columnStructure.getStructure().getColumn().value()))
+                .map(columnStructure -> {
+                    consumer.accept(columnStructure);
+                    return columnStructure;
                 })
                 .sorted();
     }
 
-    private Map<String, Object> createModelMap(List<ColumnFrame> columnFrames, int rowIndex) {
-        return columnFrames.stream()
-                .filter(ColumnFrame :: isExistColumn)
+    private Map<String, Object> createModelMap(List<ColumnStructure> columnStructures, int rowIndex) {
+        return columnStructures.stream()
+                .filter(ColumnStructure :: existPosition)
                 .collect(Collectors.toMap(
-                                frame -> frame.getClassModel().getFieldName(),
-                                frame -> CellUtils.getValue(this.sheet, rowIndex, frame.getHeaderColumnPosition())
+                                structure -> structure.getStructure().getFieldName(),
+                                structure -> CellUtils.getValue(this.sheet, rowIndex, structure.getHeaderColumnPosition())
                         )
                 );
     }

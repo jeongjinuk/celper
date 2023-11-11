@@ -8,17 +8,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 
-/**
- * The type Converters.
- */
 public final class Converters {
     private Converters(){
         throw new IllegalStateException();
     }
 
-    /**
-     * The type String to boolean.
-     */
     static final class StringToBoolean extends AbstractConverter<String, Boolean>{
         @Override
         protected Boolean convert(String s) {
@@ -26,9 +20,6 @@ public final class Converters {
         }
     }
 
-    /**
-     * The type String to double.
-     */
     static final class StringToDouble extends AbstractConverter<String, Double>{
         @Override
         protected Double convert(String s) {
@@ -41,9 +32,6 @@ public final class Converters {
         }
     }
 
-    /**
-     * The type Double to date.
-     */
     static final class DoubleToDate extends AbstractConverter<Double, Date>{
         @Override
         protected Date convert(Double d) {
@@ -51,9 +39,6 @@ public final class Converters {
         }
     }
 
-    /**
-     * The type Double to local date time.
-     */
     static final class DoubleToLocalDateTime extends AbstractConverter<Double, LocalDateTime> {
         @Override
         protected LocalDateTime convert(Double d) {
@@ -61,9 +46,6 @@ public final class Converters {
         }
     }
 
-    /**
-     * The type Double to local date.
-     */
     static final class DoubleToLocalDate extends AbstractConverter<Double, LocalDate> {
         @Override
         protected LocalDate convert(Double d) {
@@ -71,9 +53,6 @@ public final class Converters {
         }
     }
 
-    /**
-     * The type Double to local time.
-     */
     static final class DoubleToLocalTime extends AbstractConverter<Double, LocalTime> {
         @Override
         protected LocalTime convert(Double d) {

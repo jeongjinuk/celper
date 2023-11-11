@@ -1,7 +1,9 @@
+/*
 package org.celper.core;
 
 import org.celper.annotations.Column;
-import org.celper.core.model.ClassModel;
+import org.celper.core.structure.ClassModel;
+import org.celper.core.structure.Structure;
 import org.celper.core.style.SheetStyleConfigurer;
 import org.celper.util.ReflectionUtils;
 
@@ -13,9 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-/**
- * The type Class model registrator.
- */
 public final class ClassModelRegistrator {
     private static final ConcurrentHashMap<Class<?>, List<ClassModel>> CLASS_MODEL_MAP = new ConcurrentHashMap<>();
 
@@ -23,33 +22,15 @@ public final class ClassModelRegistrator {
         throw new IllegalStateException("Registrator Class");
     }
 
-    /**
-     * Add.
-     *
-     * @param clazz the clazz
-     */
     public static void add(Class<?> clazz) {
         CLASS_MODEL_MAP.put(clazz, Arrays.asList(createClassModels(clazz)));
     }
 
-    /**
-     * Gets or default.
-     *
-     * @param clazz the clazz
-     * @return the or default
-     */
     static List<ClassModel> getOrDefault(Class<?> clazz) {
         List<ClassModel> classModels = CLASS_MODEL_MAP.get(clazz);
         return  Objects.nonNull(classModels) ? classModels : Arrays.asList(createClassModels(clazz));
     }
 
-    /**
-     * Create class models class model [ ].
-     *
-     * @param <T>   the type parameter
-     * @param clazz the clazz
-     * @return the class model [ ]
-     */
     static <T> ClassModel[] createClassModels(Class<T> clazz) {
         Function<Field, ClassModel> classModelSupplier = ClassModel::new;
         SheetStyleConfigurer sheetStyle = ClassModel.createSheetStyle(clazz);
@@ -68,4 +49,13 @@ public final class ClassModelRegistrator {
                 .map(ClassModel :: setCellFormat)
                 .toArray(ClassModel[] :: new);
     }
+    public <T> Structure[] createStructures(Class<T> clazz){
+        AtomicInteger atomicInteger = new AtomicInteger(0);
+        return ReflectionUtils.getDeclaredFields(clazz)
+                .stream()
+                .filter(field -> field.isAnnotationPresent(Column.class))
+                .map(field -> new Structure(clazz, field, atomicInteger.getAndIncrement()))
+                .toArray(Structure[]::new);
+    }
 }
+*/

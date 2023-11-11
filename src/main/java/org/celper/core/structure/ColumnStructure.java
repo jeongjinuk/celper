@@ -1,4 +1,4 @@
-package org.celper.core.model;
+package org.celper.core.structure;
 
 import lombok.*;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -13,17 +13,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-/**
- * The type Column frame.
- */
 @Getter
 @ToString
 @Builder(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
-public class ColumnFrame implements Comparable<ColumnFrame> {
+public class ColumnStructure implements Comparable<ColumnStructure> {
     @Getter(AccessLevel.NONE)
     private Workbook _wb;
-    private ClassModel classModel;
+    private Structure structure;
     private List<String> importNameOptions;
     private CellStyle defaultCellStyle;
     private CellStyle headerAreaCellStyle;
@@ -31,56 +28,32 @@ public class ColumnFrame implements Comparable<ColumnFrame> {
     private int headerRowPosition = -1;
     private int headerColumnPosition = -1;
 
-    /**
-     * Instantiates a new Column frame.
-     *
-     * @param workbook   the workbook
-     * @param classModel the class model
-     */
-    public ColumnFrame(Workbook workbook, ClassModel classModel) {
+    public ColumnStructure(Workbook workbook, Structure structure) {
         this._wb = workbook;
-        this.classModel = classModel;
+        this.structure = structure;
         this.importNameOptions = createImportNameOptions();
     }
 
-    /**
-     * Sets column style.
-     */
     public void setColumnStyle() {
-        this.headerAreaCellStyle = createCellStyle(classModel :: getHeaderAreaConfigurer);
-        this.dataAreaCellStyle = createCellStyle(classModel :: getDataAreaConfigurer);
+        this.headerAreaCellStyle = createCellStyle(structure :: getHeaderAreaConfigurer);
+        this.dataAreaCellStyle = createCellStyle(structure :: getDataAreaConfigurer);
         setDataFormat();
     }
 
-    /**
-     * Sets sheet style.
-     *
-     * @param sheet the sheet
-     */
     public void setSheetStyle(Sheet sheet) {
         this.defaultCellStyle = this._wb.createCellStyle();
         SheetStyleBuilder builder = new SheetStyleBuilder(this._wb, sheet, this.defaultCellStyle);
-        this.classModel.getSheetStyleConfigurer().config(builder);
+        this.structure.getSheetStyleConfigurer().config(builder);
     }
 
-    /**
-     * Sets non sheet style.
-     */
     public void setNonSheetStyle() {
         this.defaultCellStyle = this._wb.createCellStyle();
     }
 
-    /**
-     * Create import only column frame column frame.
-     *
-     * @param row the row
-     * @param col the col
-     * @return the column frame
-     */
-    public ColumnFrame createImportOnlyColumnFrame(int row, int col) {
-        return ColumnFrame.builder()
+    public ColumnStructure newColumnStructure(int row, int col) {
+        return ColumnStructure.builder()
                 ._wb(this._wb)
-                .classModel(this.classModel)
+                .structure(this.structure)
                 .importNameOptions(this.importNameOptions)
                 .defaultCellStyle(this.defaultCellStyle)
                 .headerAreaCellStyle(this.headerAreaCellStyle)
@@ -90,39 +63,23 @@ public class ColumnFrame implements Comparable<ColumnFrame> {
                 .build();
     }
 
-    /**
-     * Compare row position int.
-     *
-     * @param o the o
-     * @return the int
-     */
-    public int compareRowPosition(ColumnFrame o) {
+    public int compareRowPosition(ColumnStructure o) {
         return o.getHeaderRowPosition() - this.getHeaderRowPosition();
     }
 
-    /**
-     * Is default value exists boolean.
-     *
-     * @return the boolean
-     */
     public boolean isDefaultValueExists() {
-        return !"".equals(this.classModel.getDefaultValue());
+        return !"".equals(this.structure.getDefaultValue());
     }
 
-    /**
-     * Is exist column boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isExistColumn() {
+    public boolean existPosition() {
         return headerRowPosition >= 0 && headerColumnPosition >= 0;
     }
 
     private List<String> createImportNameOptions() {
         List<String> titles = new ArrayList<>();
-        titles.add(this.classModel.getColumn().value());
-        if (!"".equals(this.classModel.getColumn().importNameOptions()[0])) {
-            titles.addAll(Arrays.asList(this.classModel.getColumn().importNameOptions()));
+        titles.add(this.structure.getColumn().value());
+        if (!"".equals(this.structure.getColumn().importNameOptions()[0])) {
+            titles.addAll(Arrays.asList(this.structure.getColumn().importNameOptions()));
         }
         return titles;
     }
@@ -135,14 +92,14 @@ public class ColumnFrame implements Comparable<ColumnFrame> {
     }
 
     private void setDataFormat() {
-        this.dataAreaCellStyle.setDataFormat(this._wb.createDataFormat().getFormat(this.classModel.getCellFormat()));
+        this.dataAreaCellStyle.setDataFormat(this._wb.createDataFormat().getFormat(this.structure.getCellFormat()));
     }
 
     @Override
-    public int compareTo(ColumnFrame o) {
-        boolean b = o.classModel.getExportPriority() != this.classModel.getExportPriority();
-        return b ? this.classModel.getExportPriority() - o.classModel.getExportPriority() :
-                this.classModel.getColumn().value().compareTo(o.classModel.getColumn().value());
+    public int compareTo(ColumnStructure o) {
+        boolean b = o.structure.getExportPriority() != this.structure.getExportPriority();
+        return b ? this.structure.getExportPriority() - o.structure.getExportPriority() :
+                this.structure.getColumn().value().compareTo(o.structure.getColumn().value());
     }
 
 }
