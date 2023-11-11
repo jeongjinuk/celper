@@ -2,9 +2,10 @@ package org.celper.util;
 
 import org.celper.core.structure.Structure;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -12,13 +13,13 @@ import java.util.stream.Collectors;
  * The type Structure registrator.
  */
 public final class StructureRegistrator {
-    private final ConcurrentHashMap<Class<?>, List<Structure>> structureMap;
+    private final Map<Class<?>, List<Structure>> structureMap;
 
     /**
      * Instantiates a new Structure registrator.
      */
     public StructureRegistrator() {
-        this.structureMap = new ConcurrentHashMap<>();
+        this.structureMap = new HashMap<>();
     }
 
     /**
@@ -28,8 +29,7 @@ public final class StructureRegistrator {
      * @return the or default
      */
     public List<Structure> getOrDefault(Class<?> clazz) {
-        List<Structure> structures = structureMap.get(clazz);
-        return Objects.nonNull(structures) ? structures : createStructures(clazz);
+        return structureMap.get(clazz) == null ? createStructures(clazz) : structureMap.get(clazz);
     }
 
     /**
