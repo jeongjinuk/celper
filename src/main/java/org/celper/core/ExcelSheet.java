@@ -120,7 +120,7 @@ public class ExcelSheet {
 
         headerWrite(multiColumnStructures, headerRowIndex);
         IntStream.rangeClosed(dataRow, multiModelSize)
-                .forEach(rowIndex -> multiModelDataWrite(multiColumnStructures, rowIndex, multiModel.get(rowIndex - 1)));
+                .forEach(rowIndex -> dataWrite(multiColumnStructures, rowIndex, multiModel.get(rowIndex - 1)));
     }
 
     /**
@@ -155,7 +155,7 @@ public class ExcelSheet {
         write(columnStructures, setHeader, setStyle);
     }
 
-    private void multiModelDataWrite(List<ColumnStructure> columnStructures, int rowIndex, Object[] model) {
+    private void dataWrite(List<ColumnStructure> columnStructures, int rowIndex, Object[] model) {
         Stream.of(model).forEach(o -> dataWrite(columnStructures, rowIndex, o));
     }
 
