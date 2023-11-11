@@ -16,39 +16,70 @@ import java.util.Objects;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
+/**
+ * The type Cell utils.
+ */
 public final class CellUtils {
-
-    private CellUtils(){
+    private CellUtils() {
         throw new IllegalStateException("Utility class");
     }
 
-    static Row createRow(Sheet sheet, int rowIndex, int cellSize){
+    /**
+     * Create row row.
+     *
+     * @param sheet    the sheet
+     * @param rowIndex the row index
+     * @param cellSize the cell size
+     * @return the row
+     */
+    static Row createRow(Sheet sheet, int rowIndex, int cellSize) {
         Row row = Objects.isNull(sheet.getRow(rowIndex)) ? sheet.createRow(rowIndex) : sheet.getRow(rowIndex);
         IntConsumer createCell = colIndex -> row.getCell(colIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
         IntStream.range(0, cellSize).forEach(createCell);
         return row;
     }
 
-    static Object getValue(Sheet sheet, int rowIndex, int colIndex){
+    /**
+     * Gets value.
+     *
+     * @param sheet    the sheet
+     * @param rowIndex the row index
+     * @param colIndex the col index
+     * @return the value
+     */
+    static Object getValue(Sheet sheet, int rowIndex, int colIndex) {
         return getValue(
                 sheet.getRow(rowIndex).getCell(colIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
     }
 
-    static void setValue(ColumnStructure frame, Cell cell, Object o) {
+    /**
+     * Sets value.
+     *
+     * @param columnStructure the column structure
+     * @param cell            the cell
+     * @param o               the o
+     */
+    static void setValue(ColumnStructure columnStructure, Cell cell, Object o) {
         try {
-            Field field = frame.getStructure().getField();
+            Field field = columnStructure.getStructure().getField();
             field.setAccessible(true);
             Object val = field.get(o);
-            val = val == null && frame.isDefaultValueExists() ? frame.getStructure().getDefaultValue() : val;
+            val = val == null && columnStructure.isDefaultValueExists() ? columnStructure.getStructure().getDefaultValue() : val;
             setValue(cell, val);
-        }catch (IllegalAccessException | IllegalArgumentException ignored) {
-        }catch (NullPointerException e) {
-            if (frame.isDefaultValueExists()) {
-                setValue(cell, frame.getStructure().getDefaultValue());
+        } catch (IllegalAccessException | IllegalArgumentException ignored) {
+        } catch (NullPointerException e) {
+            if (columnStructure.isDefaultValueExists()) {
+                setValue(cell, columnStructure.getStructure().getDefaultValue());
             }
         }
     }
 
+    /**
+     * Sets value.
+     *
+     * @param cell the cell
+     * @param o    the o
+     */
     static void setValue(Cell cell, Object o) {
         if (o instanceof Double) {
             cell.setCellValue((double) o);
@@ -73,6 +104,12 @@ public final class CellUtils {
         }
     }
 
+    /**
+     * Gets value.
+     *
+     * @param cell the cell
+     * @return the value
+     */
     static Object getValue(Cell cell) {
         switch (cell.getCellType()) {
             case NUMERIC:

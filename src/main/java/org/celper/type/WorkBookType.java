@@ -6,15 +6,32 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.celper.exception.UnsupportedWorkBookVersionException;
 
+/**
+ * The enum Work book type.
+ */
 public enum WorkBookType {
+    /**
+     * Hssf work book type.
+     */
     HSSF("xls"),
-    SXSSF("xlsx"), // SXSSF 의 경우 dispose 해줘야함 아니면 user/appData/Local/temp 시트 관련 xml 계속 생김
+    /**
+     * Sxssf work book type.
+     */
+    SXSSF("xlsx"),
+    /**
+     * Xssf work book type.
+     */
     XSSF("xlsx");
     private final String type;
     WorkBookType(String type) {
         this.type = type;
     }
 
+    /**
+     * Create work book workbook.
+     *
+     * @return the workbook
+     */
     public Workbook createWorkBook() {
         switch (this){
             case HSSF:
