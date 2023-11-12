@@ -1,6 +1,6 @@
 package org.celper.core.structure;
 
-import org.celper.annotations.*;
+import org.celper.annotation.*;
 import org.celper.core.style.CellStyleConfigurer;
 import org.celper.core.style.SheetStyleConfigurer;
 import org.celper.core.style._NoCellStyle;

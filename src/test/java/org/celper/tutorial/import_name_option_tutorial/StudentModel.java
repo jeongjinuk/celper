@@ -1,6 +1,6 @@
 package org.celper.tutorial.import_name_option_tutorial;
 
-import org.celper.annotations.Column;
+import org.celper.annotation.Column;
 
 import java.time.LocalDate;
 import java.util.Objects;

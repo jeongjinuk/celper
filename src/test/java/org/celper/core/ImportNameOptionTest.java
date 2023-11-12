@@ -1,6 +1,6 @@
 package org.celper.core;
 
-import org.celper.annotations.Column;
+import org.celper.annotation.Column;
 import org.support.TestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

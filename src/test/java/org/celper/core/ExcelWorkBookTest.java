@@ -1,7 +1,6 @@
 package org.celper.core;
 
 import org.celper.type.WorkBookType;
-import org.celper.util.StructureRegistrator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

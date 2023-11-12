@@ -5,8 +5,7 @@ import org.celper.core.structure.ColumnStructure;
 import org.celper.core.structure.Structure;
 import org.celper.exception.DataListEmptyException;
 import org.celper.exception.NoSuchFieldException;
-import org.celper.util.ModelMapperFactory;
-import org.celper.util.StructureRegistrator;
+import org.celper.common.ModelMapperFactory;
 import org.modelmapper.ModelMapper;
 
 import java.util.*;

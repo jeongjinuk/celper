@@ -1,6 +1,7 @@
-package org.celper.util;
+package org.celper.core;
 
 import org.celper.core.structure.Structure;
+import org.celper.util.ReflectionUtils;
 
 import java.util.HashMap;
 import java.util.List;

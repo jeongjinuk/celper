@@ -1,8 +1,8 @@
 package org.celper.tutorial.style_tutorial.cell_style_tutorial;
 
-import org.celper.annotations.Column;
-import org.celper.annotations.ColumnStyle;
-import org.celper.annotations.SheetStyle;
+import org.celper.annotation.Column;
+import org.celper.annotation.ColumnStyle;
+import org.celper.annotation.SheetStyle;
 import org.celper.tutorial.style_tutorial.HelloCellStyle;
 import org.celper.tutorial.style_tutorial.HelloSheetStyle;
 

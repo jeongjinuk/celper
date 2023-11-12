@@ -1,4 +1,4 @@
-package org.celper.util;
+package org.celper.common;
 
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.modelmapper.AbstractConverter;
@@ -9,10 +9,10 @@ import java.time.LocalTime;
 import java.util.Date;
 
 /**
- * The type Converters.
+ * The type Model mapper converters.
  */
-public final class Converters {
-    private Converters() {
+public final class ModelMapperConverters {
+    private ModelMapperConverters() {
         throw new IllegalStateException();
     }
 

@@ -1,4 +1,4 @@
-package org.celper.util;
+package org.celper.common;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
@@ -26,12 +26,12 @@ public final class ModelMapperFactory {
         return modelMapper;
     }
     private static void addConverter(ModelMapper modelMapper) {
-        modelMapper.addConverter(new Converters.DoubleToDate());
-        modelMapper.addConverter(new Converters.DoubleToLocalDateTime());
-        modelMapper.addConverter(new Converters.DoubleToLocalDate());
-        modelMapper.addConverter(new Converters.DoubleToLocalTime());
-        modelMapper.addConverter(new Converters.StringToDouble());
-        modelMapper.addConverter(new Converters.StringToBoolean());
+        modelMapper.addConverter(new ModelMapperConverters.DoubleToDate());
+        modelMapper.addConverter(new ModelMapperConverters.DoubleToLocalDateTime());
+        modelMapper.addConverter(new ModelMapperConverters.DoubleToLocalDate());
+        modelMapper.addConverter(new ModelMapperConverters.DoubleToLocalTime());
+        modelMapper.addConverter(new ModelMapperConverters.StringToDouble());
+        modelMapper.addConverter(new ModelMapperConverters.StringToBoolean());
     }
 }
 

@@ -1,6 +1,6 @@
 package org.celper.tutorial.simple_mapping_tutorial;
 
-import org.celper.annotations.Column;
+import org.celper.annotation.Column;
 
 import java.time.LocalDate;
 

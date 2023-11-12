@@ -1,7 +1,7 @@
 package org.celper.tutorial.cellformat_tutorial;
 
-import org.celper.annotations.CellFormat;
-import org.celper.annotations.Column;
+import org.celper.annotation.CellFormat;
+import org.celper.annotation.Column;
 import org.celper.type.BuiltinCellFormatType;
 
 import java.time.LocalDate;

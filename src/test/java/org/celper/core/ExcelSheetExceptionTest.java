@@ -1,6 +1,6 @@
 package org.celper.core;
 
-import org.celper.annotations.Column;
+import org.celper.annotation.Column;
 import org.celper.exception.DataListEmptyException;
 import org.celper.exception.NoSuchFieldException;
 import org.celper.type.WorkBookType;
