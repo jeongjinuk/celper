@@ -17,7 +17,7 @@ public enum BuiltinCellFormatType {
      */
     DECIMAL("0.00"),
     /**
-     * Thousand separator builtin cell format type.
+     * A Thousand separator builtin cell format type.
      */
     THOUSAND_SEPARATOR("#,##0"),
     /**

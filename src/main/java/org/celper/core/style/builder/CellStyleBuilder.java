@@ -21,7 +21,7 @@ public class CellStyleBuilder {
     }
 
     /**
-     * Sets all of border.
+     * Sets all border.
      *
      * @param borderStyle the border style
      * @return the all of border

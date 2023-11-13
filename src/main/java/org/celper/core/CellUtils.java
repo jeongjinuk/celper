@@ -25,7 +25,7 @@ public final class CellUtils {
     }
 
     /**
-     * Create row row.
+     * Create row.
      *
      * @param sheet    the sheet
      * @param rowIndex the row index

@@ -41,13 +41,7 @@ public final class StructureRegistrator {
         structureMap.put(clazz, createStructures(clazz));
     }
 
-    /**
-     * Create structures list.
-     *
-     * @param clazz the clazz
-     * @return the list
-     */
-    public List<Structure> createStructures(Class<?> clazz) {
+    private List<Structure> createStructures(Class<?> clazz) {
         AtomicInteger atomicInteger = new AtomicInteger(0);
         return ReflectionUtils.getDeclaredFields(clazz)
                 .stream()
@@ -55,4 +49,5 @@ public final class StructureRegistrator {
                 .map(field -> new Structure(clazz, field, atomicInteger.getAndIncrement()))
                 .collect(Collectors.toList());
     }
+
 }

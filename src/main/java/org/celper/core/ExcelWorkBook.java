@@ -61,7 +61,7 @@ public class ExcelWorkBook {
     /**
      * Create sheet excel sheet.
      *
-     * @return the excel sheet
+     * @return the Excel sheet
      */
     public ExcelSheet createSheet() {
         ExcelSheet sheet = new ExcelSheet(this._wb, this._wb.createSheet(), this.structureRegistrator);
@@ -73,7 +73,7 @@ public class ExcelWorkBook {
      * Create sheet excel sheet.
      *
      * @param name the name
-     * @return the excel sheet
+     * @return the Excel sheet
      */
     public ExcelSheet createSheet(String name) {
         ExcelSheet sheet = new ExcelSheet(this._wb, this._wb.createSheet(name), this.structureRegistrator);
