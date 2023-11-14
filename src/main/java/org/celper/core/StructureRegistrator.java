@@ -9,34 +9,17 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-/**
- * The type Structure registrator.
- */
 public final class StructureRegistrator {
     private final Map<Class<?>, List<Structure>> structureMap;
 
-    /**
-     * Instantiates a new Structure registrator.
-     */
     public StructureRegistrator() {
         this.structureMap = new HashMap<>();
     }
 
-    /**
-     * Gets or default.
-     *
-     * @param clazz the clazz
-     * @return the or default
-     */
     public List<Structure> getOrDefault(Class<?> clazz) {
         return structureMap.get(clazz) == null ? createStructures(clazz) : structureMap.get(clazz);
     }
 
-    /**
-     * Add.
-     *
-     * @param clazz the clazz
-     */
     public void add(Class<?> clazz) {
         structureMap.put(clazz, createStructures(clazz));
     }

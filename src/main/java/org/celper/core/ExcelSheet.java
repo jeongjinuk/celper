@@ -2,6 +2,7 @@ package org.celper.core;
 
 import org.apache.poi.ss.usermodel.*;
 import org.celper.core.structure.ColumnStructure;
+import org.celper.core.structure.ImportStructure;
 import org.celper.core.structure.Structure;
 import org.celper.exception.DataListEmptyException;
 import org.celper.exception.NoSuchFieldException;
@@ -17,62 +18,29 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-/**
- * The type Excel sheet.
- */
 public class ExcelSheet {
     private final Workbook _wb;
     private final Sheet sheet;
     private final StructureRegistrator structureRegistrator;
 
-    /**
-     * Instantiates a new Excel sheet.
-     *
-     * @param workbook             the workbook
-     * @param sheet                the sheet
-     * @param structureRegistrator the structure registrator
-     */
     public ExcelSheet(Workbook workbook, Sheet sheet, StructureRegistrator structureRegistrator) {
         this._wb = workbook;
         this.sheet = sheet;
         this.structureRegistrator = structureRegistrator;
     }
 
-    /**
-     * Gets name.
-     *
-     * @return the name
-     */
     public String getName() {
         return this.sheet.getSheetName();
     }
 
-    /**
-     * Gets sheet.
-     *
-     * @return the sheet
-     */
     public Sheet getSheet() {
         return this.sheet;
     }
 
-    /**
-     * Model to sheet.
-     *
-     * @param <T>   the type parameter
-     * @param model the model
-     */
     public <T> void modelToSheet(List<T> model) {
         modelToSheet(header -> false, model);
     }
 
-    /**
-     * Model to sheet.
-     *
-     * @param <T>            the type parameter
-     * @param excludedHeader the excluded header
-     * @param model          the model
-     */
     public <T> void modelToSheet(Predicate<String> excludedHeader, List<T> model) {
         if (Objects.isNull(model) || model.isEmpty()) {
             throw new DataListEmptyException("data list is empty exception");
@@ -88,21 +56,10 @@ public class ExcelSheet {
                 .forEach(rowIndex -> dataWrite(columnStructures, rowIndex, model.get(rowIndex - 1)));
     }
 
-    /**
-     * Multi model to sheet.
-     *
-     * @param modelLists the model lists
-     */
     public void multiModelToSheet(List<?>... modelLists) {
         multiModelToSheet(s -> false, modelLists);
     }
 
-    /**
-     * Multi model to sheet.
-     *
-     * @param excludedHeader the excluded header
-     * @param modelLists     the model lists
-     */
     public void multiModelToSheet(Predicate<String> excludedHeader, List<?>... modelLists) {
         for (List<?> modelList : modelLists) {
             if (Objects.isNull(modelList)) {
@@ -122,21 +79,14 @@ public class ExcelSheet {
                 .forEach(rowIndex -> dataWrite(multiColumnStructures, rowIndex, multiModel.get(rowIndex - 1)));
     }
 
-    /**
-     * Sheet to model list.
-     *
-     * @param <T>   the type parameter
-     * @param clazz the clazz
-     * @return the list
-     */
     public <T> List<T> sheetToModel(Class<T> clazz) {
         ModelMapper modelMapper = ModelMapperFactory.defaultModelMapper(); // Model Mapper 가져오기
 
         List<ColumnStructure> columnStructures = createColumnStructures(header -> false, structureRegistrator.getOrDefault(clazz));
-        List<ColumnStructure> importList = convertImportColumnStructures(columnStructures);
+        List<ImportStructure> importList = convertImportStructures(columnStructures);
 
         int startRow = importList.stream()// 병합을 고려해서 startRow 추출 병합 고려할려면 isMerged 만들어야함
-                .max(ColumnStructure :: compareRowPosition)
+                .max(ImportStructure :: compareTo)
                 .orElseThrow(() -> new NoSuchFieldException(String.format("'%s' 시트에 매칭된 필드가 없습니다.", this.sheet.getSheetName())))
                 .getHeaderRowPosition() + 1;
 
@@ -186,8 +136,8 @@ public class ExcelSheet {
         return convertModel;
     }
 
-    private List<ColumnStructure> convertImportColumnStructures(List<ColumnStructure> columnStructures) {
-        List<ColumnStructure> newList = new ArrayList<>(columnStructures.size());
+    private List<ImportStructure> convertImportStructures(List<ColumnStructure> columnStructures) {
+        List<ImportStructure> newList = new ArrayList<>(columnStructures.size());
         int searchRowRange = Math.min(this.sheet.getLastRowNum(), 100);
         for (int i = 0; i < searchRowRange; i++) {
             Stream.of(this.sheet.getRow(i))
@@ -200,11 +150,12 @@ public class ExcelSheet {
         return newList;
     }
 
-    private void add(List<ColumnStructure> columnStructures, List<ColumnStructure> newList, Cell cell) {
+    private void add(List<ColumnStructure> columnStructures, List<ImportStructure> newList, Cell cell) {
         for (ColumnStructure structure : columnStructures) {
-            if (structure.getImportNameOptions().contains(CellUtils.getValue(cell).toString().trim())) {
+            if (structure.getImportNameOptions().contains(CellUtils.getValue(cell).toString().trim().intern())) {
+                ImportStructure importStructure = new ImportStructure(structure, cell.getRowIndex(), cell.getColumnIndex());
+                newList.add(importStructure);
                 columnStructures.remove(structure);
-                newList.add(structure.newColumnStructure(cell.getRowIndex(), cell.getColumnIndex()));
                 return;
             }
         }
@@ -238,9 +189,9 @@ public class ExcelSheet {
                 .sorted();
     }
 
-    private Map<String, Object> createModelMap(List<ColumnStructure> columnStructures, int rowIndex) {
-        return columnStructures.stream()
-                .filter(ColumnStructure :: existPosition)
+    private Map<String, Object> createModelMap(List<ImportStructure> importStructure, int rowIndex) {
+        return importStructure.stream()
+                .filter(ImportStructure :: existPosition)
                 .collect(Collectors.toMap(
                                 structure -> structure.getStructure().getFieldName(),
                                 structure -> CellUtils.getValue(this.sheet, rowIndex, structure.getHeaderColumnPosition())

@@ -14,6 +14,6 @@ class ExcelWorkBookTest {
         ExcelWorkBook excelWorkBook = new ExcelWorkBook(WorkBookType.XSSF);
         String sheetName = "테스트 1";
         ExcelSheet sheet = excelWorkBook.createSheet(sheetName);
-        assertEquals(sheetName, excelWorkBook.getSheetByName(sheetName).getName());
+        assertEquals(sheetName, excelWorkBook.getSheetByName(sheetName).get().getName());
     }
 }

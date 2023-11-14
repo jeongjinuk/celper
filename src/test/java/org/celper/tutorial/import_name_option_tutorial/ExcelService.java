@@ -49,7 +49,7 @@ public class ExcelService {
         expectedList.add(student2);
 
         ExcelWorkBook excelWorkBook = new ExcelWorkBook(TestSupport.workBookInput("Import-Name-Student.xlsx"));
-        List<StudentModel> resultModel = excelWorkBook.getSheetAt(0).sheetToModel(StudentModel.class);
+        List<StudentModel> resultModel = excelWorkBook.getSheetAt(0).get().sheetToModel(StudentModel.class);
 
         System.out.println("celper 모듈을 통해 나온 결과");
         resultModel.forEach(System.out :: println);

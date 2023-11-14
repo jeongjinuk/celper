@@ -49,7 +49,7 @@ class PriorityConstructTest {
         ExcelWorkBook excelWorkBook = new ExcelWorkBook(WorkBookType.XSSF, structureRegistrator);
         excelWorkBook.createSheet().modelToSheet(datas);
 
-        ExcelSheet result = excelWorkBook.getSheetAt(0);
+        ExcelSheet result = excelWorkBook.getSheetAt(0).get();
         Row header = result.getSheet().getRow(0);
         Row data = result.getSheet().getRow(1);
         assertHeader(header);

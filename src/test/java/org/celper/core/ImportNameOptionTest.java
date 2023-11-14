@@ -1,5 +1,6 @@
 package org.celper.core;
 
+import lombok.ToString;
 import org.celper.annotation.Column;
 import org.support.TestSupport;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +12,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ImportNameOptionTest {
+    @ToString
     static class ImportNameOptionDTO {
         @Column(value = "이름", importNameOptions = {"성명"})
         private String name;
@@ -43,7 +45,7 @@ class ImportNameOptionTest {
         datas.add(dto);
 
         ExcelWorkBook excelWorkBook = new ExcelWorkBook(TestSupport.workBookInput("Import-Name-Student.xlsx"));
-        ExcelSheet result = excelWorkBook.getSheetAt(0);
+        ExcelSheet result = excelWorkBook.getSheetAt(0).get();
         List<ImportNameOptionDTO> dtos = result.sheetToModel(ImportNameOptionDTO.class);
         assertEquals(dto.toString(), dtos.get(0).toString());
     }
