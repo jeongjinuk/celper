@@ -9,6 +9,9 @@ import org.celper.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 
+/**
+ * The type Structure.
+ */
 public class Structure {
     private final Field field;
     private String fieldName;
@@ -20,6 +23,13 @@ public class Structure {
     private CellStyleConfigurer headerAreaConfigurer = builder -> {};
     private CellStyleConfigurer dataAreaConfigurer = builder -> {};
 
+    /**
+     * Instantiates a new Structure.
+     *
+     * @param clazz        the clazz
+     * @param field        the field
+     * @param definedOrder the defined order
+     */
     public  <T> Structure(final Class<T> clazz, final Field field, final int definedOrder) {
         this.field = field; // non null
         this.fieldName = field.getName();
@@ -31,38 +41,83 @@ public class Structure {
         setCellFormat();
     }
 
+    /**
+     * Gets field.
+     *
+     * @return the field
+     */
     public Field getField() {
         return field;
     }
 
+    /**
+     * Gets field name.
+     *
+     * @return the field name
+     */
     public String getFieldName() {
         return fieldName;
     }
 
+    /**
+     * Gets column.
+     *
+     * @return the column
+     */
     public Column getColumn() {
         return column;
     }
 
+    /**
+     * Gets default value.
+     *
+     * @return the default value
+     */
     public String getDefaultValue() {
         return defaultValue;
     }
 
+    /**
+     * Gets cell format.
+     *
+     * @return the cell format
+     */
     public String getCellFormat() {
         return cellFormat;
     }
 
+    /**
+     * Gets export priority.
+     *
+     * @return the export priority
+     */
     public int getExportPriority() {
         return exportPriority;
     }
 
+    /**
+     * Gets sheet style configurer.
+     *
+     * @return the sheet style configurer
+     */
     public SheetStyleConfigurer getSheetStyleConfigurer() {
         return sheetStyleConfigurer;
     }
 
+    /**
+     * Gets header area configurer.
+     *
+     * @return the header area configurer
+     */
     public CellStyleConfigurer getHeaderAreaConfigurer() {
         return headerAreaConfigurer;
     }
 
+    /**
+     * Gets data area configurer.
+     *
+     * @return the data area configurer
+     */
     public CellStyleConfigurer getDataAreaConfigurer() {
         return dataAreaConfigurer;
     }
@@ -102,6 +157,12 @@ public class Structure {
     }
 
 
+    /**
+     * Exists column annotation boolean.
+     *
+     * @param field the field
+     * @return the boolean
+     */
     public static boolean existsColumnAnnotation(Field field){
         return field.isAnnotationPresent(Column.class);
     }

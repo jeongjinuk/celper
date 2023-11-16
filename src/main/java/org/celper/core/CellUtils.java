@@ -16,11 +16,22 @@ import java.util.Objects;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
+/**
+ * The type Cell utils.
+ */
 public final class CellUtils {
     private CellUtils() {
         throw new IllegalStateException("Utility class");
     }
 
+    /**
+     * Create row row.
+     *
+     * @param sheet    the sheet
+     * @param rowIndex the row index
+     * @param cellSize the cell size
+     * @return the row
+     */
     static Row createRow(Sheet sheet, int rowIndex, int cellSize) {
         Row row = Objects.isNull(sheet.getRow(rowIndex)) ? sheet.createRow(rowIndex) : sheet.getRow(rowIndex);
         IntConsumer createCell = colIndex -> row.getCell(colIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
@@ -28,11 +39,26 @@ public final class CellUtils {
         return row;
     }
 
+    /**
+     * Gets value.
+     *
+     * @param sheet    the sheet
+     * @param rowIndex the row index
+     * @param colIndex the col index
+     * @return the value
+     */
     static Object getValue(Sheet sheet, int rowIndex, int colIndex) {
         return getValue(
                 sheet.getRow(rowIndex).getCell(colIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
     }
 
+    /**
+     * Sets value.
+     *
+     * @param columnStructure the column structure
+     * @param cell            the cell
+     * @param o               the o
+     */
     static void setValue(ColumnStructure columnStructure, Cell cell, Object o) {
         try {
             Field field = columnStructure.getStructure().getField();
@@ -48,6 +74,12 @@ public final class CellUtils {
         }
     }
 
+    /**
+     * Sets value.
+     *
+     * @param cell the cell
+     * @param o    the o
+     */
     static void setValue(Cell cell, Object o) {
         if (o instanceof Double) {
             cell.setCellValue((double) o);
@@ -72,6 +104,12 @@ public final class CellUtils {
         }
     }
 
+    /**
+     * Gets value.
+     *
+     * @param cell the cell
+     * @return the value
+     */
     static Object getValue(Cell cell) {
         switch (cell.getCellType()) {
             case NUMERIC:
