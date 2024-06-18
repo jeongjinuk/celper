@@ -18,62 +18,29 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-/**
- * The type Excel sheet.
- */
 public class ExcelSheet {
     private final Workbook _wb;
     private final Sheet sheet;
     private final StructureRegistrator structureRegistrator;
 
-    /**
-     * Instantiates a new Excel sheet.
-     *
-     * @param workbook             the workbook
-     * @param sheet                the sheet
-     * @param structureRegistrator the structure registrator
-     */
     public ExcelSheet(Workbook workbook, Sheet sheet, StructureRegistrator structureRegistrator) {
         this._wb = workbook;
         this.sheet = sheet;
         this.structureRegistrator = structureRegistrator;
     }
 
-    /**
-     * Gets name.
-     *
-     * @return the name
-     */
     public String getName() {
         return this.sheet.getSheetName();
     }
 
-    /**
-     * Gets sheet.
-     *
-     * @return the sheet
-     */
     public Sheet getSheet() {
         return this.sheet;
     }
 
-    /**
-     * Model to sheet.
-     *
-     * @param <T>   the type parameter
-     * @param model the model
-     */
     public <T> void modelToSheet(List<T> model) {
         modelToSheet(header -> false, model);
     }
 
-    /**
-     * Model to sheet.
-     *
-     * @param <T>            the type parameter
-     * @param excludedHeader the excluded header
-     * @param model          the model
-     */
     public <T> void modelToSheet(Predicate<String> excludedHeader, List<T> model) {
         if (Objects.isNull(model) || model.isEmpty()) {
             throw new DataListEmptyException("data list is empty exception");
@@ -89,21 +56,10 @@ public class ExcelSheet {
                 .forEach(rowIndex -> dataWrite(columnStructures, rowIndex, model.get(rowIndex - 1)));
     }
 
-    /**
-     * Multi model to sheet.
-     *
-     * @param modelLists the model lists
-     */
     public void multiModelToSheet(List<?>... modelLists) {
         multiModelToSheet(s -> false, modelLists);
     }
 
-    /**
-     * Multi model to sheet.
-     *
-     * @param excludedHeader the excluded header
-     * @param modelLists     the model lists
-     */
     public void multiModelToSheet(Predicate<String> excludedHeader, List<?>... modelLists) {
         for (List<?> modelList : modelLists) {
             if (Objects.isNull(modelList)) {
@@ -123,13 +79,6 @@ public class ExcelSheet {
                 .forEach(rowIndex -> dataWrite(multiColumnStructures, rowIndex, multiModel.get(rowIndex - 1)));
     }
 
-    /**
-     * Sheet to model list.
-     *
-     * @param <T>   the type parameter
-     * @param clazz the clazz
-     * @return the list
-     */
     public <T> List<T> sheetToModel(Class<T> clazz) {
         ModelMapper modelMapper = ModelMapperFactory.defaultModelMapper(); // Model Mapper 가져오기
 
@@ -201,16 +150,29 @@ public class ExcelSheet {
         return newList;
     }
 
+//    private void add(List<ColumnStructure> columnStructures, List<ImportStructure> newList, Cell cell) {
+//        for (ColumnStructure structure : columnStructures) {
+//            if (structure.getImportNameOptions().contains(CellUtils.getValue(cell).toString().trim().intern())) {
+//                ImportStructure importStructure = new ImportStructure(structure, cell.getRowIndex(), cell.getColumnIndex());
+//                newList.add(importStructure);
+//                columnStructures.remove(structure);
+//                return;
+//            }
+//        }
+//    }
+
     private void add(List<ColumnStructure> columnStructures, List<ImportStructure> newList, Cell cell) {
-        for (ColumnStructure structure : columnStructures) {
-            if (structure.getImportNameOptions().contains(CellUtils.getValue(cell).toString().trim().intern())) {
-                ImportStructure importStructure = new ImportStructure(structure, cell.getRowIndex(), cell.getColumnIndex());
-                newList.add(importStructure);
-                columnStructures.remove(structure);
-                return;
-            }
-        }
+        Optional<ColumnStructure> optionalStructure = columnStructures.stream()
+                .filter(structure -> structure.getImportNameOptions().contains(CellUtils.getValue(cell).toString().trim().intern()))
+                .findFirst();
+
+        optionalStructure.ifPresent(structure -> {
+            ImportStructure importStructure = new ImportStructure(structure, cell.getRowIndex(), cell.getColumnIndex());
+            newList.add(importStructure);
+            columnStructures.remove(structure);
+        });
     }
+
 
     private List<ColumnStructure> createMultiColumnStructures(Predicate<String> excludedHeader, List<Object[]> multiModel) {
         return Stream.of(multiModel.get(0))
