@@ -1,7 +1,7 @@
 package org.celper.tutorial.default_value_tutorial;
 
-import org.celper.annotation.Column;
-import org.celper.annotation.DefaultValue;
+import org.celper.Column;
+import org.celper.DefaultValue;
 
 import java.time.LocalDate;
 

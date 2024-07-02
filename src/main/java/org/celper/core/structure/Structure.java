@@ -1,10 +1,9 @@
 package org.celper.core.structure;
 
-import org.celper.annotation.*;
+import org.celper.*;
 import org.celper.core.style.CellStyleConfigurer;
 import org.celper.core.style.SheetStyleConfigurer;
 import org.celper.core.style._NoCellStyle;
-import org.celper.type.BuiltinCellFormatType;
 import org.celper.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -78,7 +77,7 @@ public class Structure {
     }
     private void setCellFormat() {
         if (!this.field.isAnnotationPresent(CellFormat.class)){
-            this.cellFormat = BuiltinCellFormatType.GENERAL.getCellFormat();
+            this.cellFormat = CellFormat.Type.GENERAL.getCellFormat();
             return;
         }
         CellFormat annotation = this.field.getDeclaredAnnotation(CellFormat.class);

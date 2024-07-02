@@ -1,7 +1,7 @@
 package org.celper.tutorial.style_tutorial.sheet_style_tutorial;
 
-import org.celper.annotation.Column;
-import org.celper.annotation.SheetStyle;
+import org.celper.Column;
+import org.celper.SheetStyle;
 import org.celper.tutorial.style_tutorial.HelloSheetStyle;
 
 import java.time.LocalDate;

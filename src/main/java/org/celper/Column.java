@@ -1,14 +1,16 @@
-package org.celper.annotation;
-
-import org.celper.core.style.SheetStyleConfigurer;
+package org.celper;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SheetStyle {
-    Class<? extends SheetStyleConfigurer> value();
+public @interface Column {
+    String value();
+
+    String[] importNameOptions() default {""};
+
+    int priority() default 0;
 }

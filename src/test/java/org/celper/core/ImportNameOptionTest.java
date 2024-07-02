@@ -1,7 +1,7 @@
 package org.celper.core;
 
 import lombok.ToString;
-import org.celper.annotation.Column;
+import org.celper.Column;
 import org.support.TestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

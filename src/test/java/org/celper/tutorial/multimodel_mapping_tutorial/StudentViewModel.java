@@ -1,6 +1,6 @@
 package org.celper.tutorial.multimodel_mapping_tutorial;
 
-import org.celper.annotation.Column;
+import org.celper.Column;
 
 public class StudentViewModel {
     @Column("학번")

@@ -1,8 +1,7 @@
 package org.celper.tutorial.cellformat_tutorial;
 
-import org.celper.annotation.CellFormat;
-import org.celper.annotation.Column;
-import org.celper.type.BuiltinCellFormatType;
+import org.celper.CellFormat;
+import org.celper.Column;
 
 import java.time.LocalDate;
 
@@ -17,7 +16,7 @@ public class StudentModel {
     @Column("나이")
     private int age;
 
-    @CellFormat(builtinFormat = BuiltinCellFormatType.SIMPLE_DATE) // 기본 제공 포멧
+    @CellFormat(builtinFormat = CellFormat.Type.SIMPLE_DATE) // 기본 제공 포멧
     @Column("생년월일")
     private LocalDate date;
 

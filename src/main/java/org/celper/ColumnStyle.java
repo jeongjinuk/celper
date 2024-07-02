@@ -1,4 +1,4 @@
-package org.celper.annotation;
+package org.celper;
 
 import org.celper.core.style.CellStyleConfigurer;
 import org.celper.core.style._NoCellStyle;
