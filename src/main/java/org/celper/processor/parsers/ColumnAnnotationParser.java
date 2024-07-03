@@ -1,31 +1,15 @@
 package org.celper.processor.parsers;
 
+import org.celper.Column;
 import org.celper.processor.FieldAnnotationMetaData;
 import org.celper.processor.Parser;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.util.ElementFilter;
-import java.util.List;
-
-class ColumnAnnotationParser implements Parser<Element, List<FieldAnnotationMetaData>> {
-
-
-
-    public ColumnAnnotationParser() {
-    }
-
+public class ColumnAnnotationParser implements Parser<FieldAnnotationMetaData, FieldAnnotationMetaData> {
     @Override
-    public List<FieldAnnotationMetaData> parse(Element element) {
-//        ElementFilter.fieldsIn(element.getEnclosedElements())
-//                .stream()
-//                .filter();
-
-        List<ExecutableElement> executableElements = ElementFilter.methodsIn(element.getEnclosedElements());
-
-        return null;
+    public FieldAnnotationMetaData parse(FieldAnnotationMetaData fieldAnnotationMetaData) {
+        Column annotation = fieldAnnotationMetaData.getField().getAnnotation(Column.class);
+        fieldAnnotationMetaData.setPriority(annotation.priority());
+        fieldAnnotationMetaData.setHeaderName(annotation.value());
+        return fieldAnnotationMetaData;
     }
-
-
-
 }
