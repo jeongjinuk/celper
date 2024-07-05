@@ -1,4 +1,4 @@
-package org.celper.processor;
+package org.celper.processor.meta;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,8 +19,8 @@ public class FieldAnnotationMetaData implements Comparable<FieldAnnotationMetaDa
 
     private String defaultValue;
 
-    private CellStyleConfigurer headerStyleConfigurer = builder -> {};
-    private CellStyleConfigurer dataStyleConfigurer = builder -> {};
+    private Class<CellStyleConfigurer> headerStyleConfigurer;
+    private Class<CellStyleConfigurer> dataStyleConfigurer;
 
     // construct
     public FieldAnnotationMetaData() {}

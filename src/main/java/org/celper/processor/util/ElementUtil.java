@@ -7,15 +7,20 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public final class ElementUtil {
 
@@ -55,42 +60,47 @@ public final class ElementUtil {
         this.messager = processingEnv.getMessager();
     }
 
-    public String buildExpectedGetterName(VariableElement field){
+    public List<VariableElement> getFieldsWithAnnotation(Element clazz, Class<? extends Annotation> annotation){
+        return ElementFilter.fieldsIn(clazz.getEnclosedElements())
+                .stream()
+                .filter(field -> Objects.nonNull(field.getAnnotation(annotation)))
+                .collect(Collectors.toList());
+    }
+
+    public String generateGetterName(VariableElement field) {
         return buildExpectedGetterName.apply(field.getSimpleName().toString()).toString();
     }
 
-    public TypeMirror toBoxedType(VariableElement field){
-        return isPrimitive(field) ? typeUtils.boxedClass((PrimitiveType) field).asType() : field.asType();
-    }
-
-    public TypeMirror getTypeMirror(Class<?> clazz){
-        return elementUtils.getTypeElement(clazz.getCanonicalName()).asType();
-    }
-
-    public boolean isSupportedFieldType(VariableElement field){
-        for (SupportType value : SupportType.values()) {
-            if (typeUtils.isSameType(getTypeMirror(value.clazz), toBoxedType(field)))
+    public boolean isFieldTypeSupported(VariableElement field) {
+        for (SupportType supportType : SupportType.values()) {
+            TypeMirror typeMirror = elementUtils.getTypeElement(supportType.clazz.getCanonicalName()).asType();
+            if (typeUtils.isSameType(typeMirror, convertToBoxedType(field)))
                 return true;
-
         }
         return false;
     }
 
-    public boolean isPrimitive(Element element){
-        return element.asType().getKind().isPrimitive();
+    public boolean hasMatchingGetter(VariableElement field) {
+        return ElementFilter.methodsIn(field.getEnclosingElement().getEnclosedElements())
+                .stream()
+                .anyMatch(method -> matchesGetterSignature(method, field));
+    }
+    public void log(Diagnostic.Kind kind, String msg){
+        messager.printMessage(kind, msg);
     }
 
-    public boolean isGetterMethodForField(ExecutableElement method, VariableElement field) {
+
+    private TypeMirror convertToBoxedType(VariableElement field) {
+        if (field.asType().getKind().isPrimitive()){
+            return  typeUtils.boxedClass((PrimitiveType) field).asType();
+        }
+        return field.asType();
+    }
+
+    private boolean matchesGetterSignature(ExecutableElement method, VariableElement field) {
         String fieldName = field.getSimpleName().toString();
-        return method.getSimpleName().contentEquals(buildExpectedGetterName.apply(fieldName));
+        return method.getSimpleName().contentEquals(buildExpectedGetterName.apply(fieldName)) &&
+                (method.getParameters().isEmpty() || method.getParameters().size() == 0) &&
+                typeUtils.isSameType(method.getReturnType(), field.asType());
     }
-
-    public boolean isNonParameter(ExecutableElement method) {
-        return method.getParameters().size() == 0;
-    }
-
-    public boolean isTypeMatch(ExecutableElement method, VariableElement field){
-        return typeUtils.isSameType(method.getReturnType(), field.asType());
-    }
-
 }

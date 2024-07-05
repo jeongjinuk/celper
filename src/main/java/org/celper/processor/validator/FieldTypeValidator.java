@@ -1,12 +1,12 @@
-package org.celper.processor.validators;
+package org.celper.processor.validator;
 
-import org.celper.processor.Validator;
 import org.celper.processor.util.ElementUtil;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.tools.Diagnostic;
 
-public class FieldTypeValidator implements Validator<VariableElement> {
+public final class FieldTypeValidator implements Validator<VariableElement> {
     /**
      * TODO javaDoc 추가
      *
@@ -34,19 +34,19 @@ public class FieldTypeValidator implements Validator<VariableElement> {
      *  java.time.LocalTime
      */
     private final ElementUtil util;
-
+    private static final String logFormat  = "The field '%s' in class '%s' is of unsupported type '%s.'";
     public FieldTypeValidator(ElementUtil util) {
         this.util = util;
     }
 
     @Override
-    public boolean valid(VariableElement variableElement) {
-        if (!util.isSupportedFieldType(variableElement)){
-            throw new UnsupportedOperationException(
-                    String.format("The field '%s' in class '%s' is of unsupported type '%s.'",
-                            variableElement.getSimpleName(),
-                            ((TypeElement) variableElement.getEnclosingElement()).getQualifiedName()));
+    public void valid(VariableElement variableElement) {
+        if (!util.isFieldTypeSupported(variableElement)) {
+            String msg = String.format(logFormat,
+                    variableElement.getSimpleName(),
+                    ((TypeElement) variableElement.getEnclosingElement()).getQualifiedName(),
+                    variableElement.asType());
+            util.log(Diagnostic.Kind.ERROR, msg);
         }
-        return true;
     }
 }

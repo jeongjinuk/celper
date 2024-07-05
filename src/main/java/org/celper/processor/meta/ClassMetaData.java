@@ -1,39 +1,34 @@
-package org.celper.processor;
+package org.celper.processor.meta;
 
 import org.celper.core.style.SheetStyleConfigurer;
 
+import javax.lang.model.element.Element;
 import java.util.List;
 
 public class ClassMetaData {
 
-    private Class<?> clazz;
-    private SheetStyleConfigurer sheetStyleConfigurer;
+    private Element clazz;
+    private Class<SheetStyleConfigurer> sheetStyleConfigurer;
     private List<FieldAnnotationMetaData> fieldAnnotationMetaDatas;
 
-    public ClassMetaData() {}
-
-    public ClassMetaData(Class<?> clazz,
-                         SheetStyleConfigurer sheetStyleConfigurer,
-                         List<FieldAnnotationMetaData> fieldAnnotationMetaDatas) {
+    public ClassMetaData(Element clazz, List<FieldAnnotationMetaData> fieldAnnotationMetaDatas) {
         this.clazz = clazz;
-        this.sheetStyleConfigurer = sheetStyleConfigurer;
-        fieldAnnotationMetaDatas.sort(FieldAnnotationMetaData::compareTo);
         this.fieldAnnotationMetaDatas = fieldAnnotationMetaDatas;
     }
 
-    public Class<?> getClazz() {
+    public Element getClazz() {
         return clazz;
     }
 
-    public void setClazz(Class<?> clazz) {
+    public void setClazz(Element clazz) {
         this.clazz = clazz;
     }
 
-    public SheetStyleConfigurer getSheetStyleConfigurer() {
+    public Class<SheetStyleConfigurer> getSheetStyleConfigurer() {
         return sheetStyleConfigurer;
     }
 
-    public void setSheetStyleConfigurer(SheetStyleConfigurer sheetStyleConfigurer) {
+    public void setSheetStyleConfigurer(Class<SheetStyleConfigurer> sheetStyleConfigurer) {
         this.sheetStyleConfigurer = sheetStyleConfigurer;
     }
 

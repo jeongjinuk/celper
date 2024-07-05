@@ -15,4 +15,3 @@ public @interface ColumnStyle {
 
     Class<? extends CellStyleConfigurer> dataAreaStyle() default _NoCellStyle.class;
 }
-
