@@ -6,11 +6,11 @@ import org.celper.core.style.SheetStyleConfigurer;
 import java.util.List;
 import java.util.function.Function;
 
-public interface Model<T> {
-    SheetStyleConfigurer getSheetStyle();
-    List<CellStyleConfigurer> getHeaderStyle();
-    List<CellStyleConfigurer> getDataStyle();
+public interface MetaData<T> {
+    SheetStyleConfigurer getSheetStyleConfig();
+    List<CellStyleConfigurer> getHeaderStyleConfigs();
+    List<CellStyleConfigurer> getDataStyleConfigs();
     List<String> getColumnNames();
     List<Object> getDefaultValues();
-    List<Function<T, Object>> getConsumers();
+    List<Function<T, Object>> getGetterFunctions();
 }

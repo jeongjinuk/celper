@@ -3,24 +3,25 @@ package org.celper.processor.meta;
 import org.celper.core.style.SheetStyleConfigurer;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import java.util.List;
 
 public class ClassMetaData {
 
-    private Element clazz;
+    private TypeElement clazz;
     private Class<SheetStyleConfigurer> sheetStyleConfigurer;
-    private List<FieldAnnotationMetaData> fieldAnnotationMetaDatas;
+    private List<FieldAnnotationMetaData> fieldAnnotationMetaDataList;
 
-    public ClassMetaData(Element clazz, List<FieldAnnotationMetaData> fieldAnnotationMetaDatas) {
+    public ClassMetaData(TypeElement clazz, List<FieldAnnotationMetaData> fieldAnnotationMetaDataList) {
         this.clazz = clazz;
-        this.fieldAnnotationMetaDatas = fieldAnnotationMetaDatas;
+        this.fieldAnnotationMetaDataList = fieldAnnotationMetaDataList;
     }
 
-    public Element getClazz() {
+    public TypeElement getClazz() {
         return clazz;
     }
 
-    public void setClazz(Element clazz) {
+    public void setClazz(TypeElement clazz) {
         this.clazz = clazz;
     }
 
@@ -32,11 +33,11 @@ public class ClassMetaData {
         this.sheetStyleConfigurer = sheetStyleConfigurer;
     }
 
-    public List<FieldAnnotationMetaData> getFieldAnnotationMetaDatas() {
-        return fieldAnnotationMetaDatas;
+    public List<FieldAnnotationMetaData> getFieldAnnotationMetaDataList() {
+        return fieldAnnotationMetaDataList;
     }
 
-    public void setFieldAnnotationMetaDatas(List<FieldAnnotationMetaData> fieldAnnotationMetaDatas) {
-        this.fieldAnnotationMetaDatas = fieldAnnotationMetaDatas;
+    public void setFieldAnnotationMetaDataList(List<FieldAnnotationMetaData> fieldAnnotationMetaDataList) {
+        this.fieldAnnotationMetaDataList = fieldAnnotationMetaDataList;
     }
 }

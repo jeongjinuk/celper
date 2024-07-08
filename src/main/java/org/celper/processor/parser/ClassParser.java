@@ -8,6 +8,7 @@ import org.celper.processor.validator.Validator;
 import org.celper.processor.validator.ValidatorFactory;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.tools.Diagnostic;
 import java.util.List;
@@ -24,7 +25,7 @@ public class ClassParser {
         this.validators = ValidatorFactory.getValidators(elementUtil);
     }
 
-    public Optional<ClassMetaData> parse(Element clazz) {
+    public Optional<ClassMetaData> parse(TypeElement clazz) {
         List<VariableElement> fields = elementUtil.getFieldsWithAnnotation(clazz, Column.class);
 
         if (fields.isEmpty()){
@@ -48,7 +49,7 @@ public class ClassParser {
             validator.valid(field);
         }
     }
-    private ClassMetaData createClassMetaData(Element clazz, List<FieldAnnotationMetaData> fieldAnnotationMetaData){
+    private ClassMetaData createClassMetaData(TypeElement clazz, List<FieldAnnotationMetaData> fieldAnnotationMetaData){
         ClassMetaData classMetaData = new ClassMetaData(clazz, fieldAnnotationMetaData);
         AnnotationHandler.applyHandlersIfPresent(ClassAnnotationHandler.values(), clazz, classMetaData);
         return classMetaData;

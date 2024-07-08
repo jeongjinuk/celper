@@ -4,12 +4,12 @@ import org.celper.SheetStyle;
 import org.celper.core.style.SheetStyleConfigurer;
 import org.celper.processor.meta.ClassMetaData;
 
-import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
-public enum ClassAnnotationHandler implements AnnotationHandler<Element, ClassMetaData>{
+public enum ClassAnnotationHandler implements AnnotationHandler<TypeElement, ClassMetaData>{
     COLUMN(SheetStyle.class, (annotation, classMetaData) -> {
         SheetStyle sheetStyle = (SheetStyle) annotation;
         classMetaData.setSheetStyleConfigurer((Class<SheetStyleConfigurer>) sheetStyle.value());
@@ -23,9 +23,9 @@ public enum ClassAnnotationHandler implements AnnotationHandler<Element, ClassMe
         this.ifPresent = ifPresent;
     }
     @Override
-    public void ifPresent(Element field,
+    public void ifPresent(TypeElement clazz,
                          ClassMetaData metaData) {
-        Annotation annotation = field.getAnnotation(this.type);
+        Annotation annotation = clazz.getAnnotation(this.type);
         if (Objects.nonNull(annotation))
             this.ifPresent.accept(annotation, metaData);
     }
