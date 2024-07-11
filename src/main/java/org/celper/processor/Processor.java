@@ -2,6 +2,7 @@ package org.celper.processor;
 
 import com.google.auto.service.AutoService;
 import org.celper.ExcelModel;
+import org.celper.processor.generator.ClassGenerator;
 import org.celper.processor.meta.ClassMetaData;
 import org.celper.processor.parser.ClassParser;
 import org.celper.processor.util.ElementUtil;
@@ -23,6 +24,7 @@ public class Processor extends AbstractProcessor {
 
     private ElementUtil elementUtil;
     private ClassParser classParser;
+    private ClassGenerator classGenerator;
 
     private static final Function<List<ClassMetaData>, String> READY_TO_GENERATED_CLASSES_LIST_LOG_MSG =
             classMetaData -> String.format("The following classes are ready to be generated: [%s]",
@@ -37,6 +39,7 @@ public class Processor extends AbstractProcessor {
         super.init(processingEnv);
         this.elementUtil = new ElementUtil(processingEnv);
         this.classParser = new ClassParser(elementUtil);
+        this.classGenerator = new ClassGenerator(elementUtil);
     }
 
     @Override
@@ -50,6 +53,7 @@ public class Processor extends AbstractProcessor {
                 .collect(Collectors.toList());
         elementUtil.log(Diagnostic.Kind.NOTE, READY_TO_GENERATED_CLASSES_LIST_LOG_MSG.apply(classMetaDataList));
         // classMetaData -> generated Class
+//        classGenerator.generate();
         return true;
     }
 

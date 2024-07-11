@@ -1,9 +1,12 @@
 package org.celper.processor.util;
 
+import com.squareup.javapoet.ClassName;
+
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
@@ -17,18 +20,28 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class ElementUtil {
 
-    private static final String GET = "get";
+    private static final String GET_PREFIX = "get";
 
-    private static final Function<String, StringBuilder> buildExpectedGetterName = fieldName -> new StringBuilder(GET)
-            .append(Character.toUpperCase(fieldName.charAt(0)))
-            .append(fieldName.substring(1));
+    private static final Function<String, StringBuilder> buildExpectedGetterName = fieldName ->
+            new StringBuilder(GET_PREFIX)
+                    .append(Character.toUpperCase(fieldName.charAt(0)))
+                    .append(fieldName.substring(1));
+
+    private static final Function<String, StringBuilder> buildExpectedFieldName = methodName -> {
+        String fieldName = methodName.split(GET_PREFIX)[0];
+        return new StringBuilder(fieldName.toLowerCase().charAt(0))
+                .append(fieldName.substring(1));
+    };
+
 
     private enum SupportType {
         INTEGER(Integer.class),
@@ -58,13 +71,24 @@ public final class ElementUtil {
         this.typeUtils = processingEnv.getTypeUtils();
         this.elementUtils = processingEnv.getElementUtils();
         this.messager = processingEnv.getMessager();
+
     }
 
-    public List<VariableElement> getFieldsWithAnnotation(Element clazz, Class<? extends Annotation> annotation){
+    public List<VariableElement> getFieldsWithAnnotation(TypeElement clazz, Class<? extends Annotation> annotation) {
         return ElementFilter.fieldsIn(clazz.getEnclosedElements())
                 .stream()
                 .filter(field -> Objects.nonNull(field.getAnnotation(annotation)))
                 .collect(Collectors.toList());
+    }
+
+    public List<ExecutableElement> getMethods(Class<?> clazz){
+        return ElementFilter.methodsIn(elementUtils
+                        .getTypeElement(ClassName.get(clazz).reflectionName())
+                        .getEnclosedElements());
+    }
+
+    public String generateFieldName(ExecutableElement method){
+        return buildExpectedFieldName.apply(method.getSimpleName().toString()).toString();
     }
 
     public String generateGetterName(VariableElement field) {
@@ -85,14 +109,15 @@ public final class ElementUtil {
                 .stream()
                 .anyMatch(method -> matchesGetterSignature(method, field));
     }
-    public void log(Diagnostic.Kind kind, String msg){
+
+    public void log(Diagnostic.Kind kind, String msg) {
         messager.printMessage(kind, msg);
     }
 
 
     private TypeMirror convertToBoxedType(VariableElement field) {
-        if (field.asType().getKind().isPrimitive()){
-            return  typeUtils.boxedClass((PrimitiveType) field).asType();
+        if (field.asType().getKind().isPrimitive()) {
+            return typeUtils.boxedClass((PrimitiveType) field).asType();
         }
         return field.asType();
     }
