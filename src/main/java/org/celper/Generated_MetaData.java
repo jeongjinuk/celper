@@ -8,50 +8,51 @@ import java.util.function.*;
 
 public final class Generated_MetaData implements MetaData<DTO> {
     private static final MetaData<DTO> INSTANCE = new Generated_MetaData();
-
-    // new $T
-    private static final SheetStyleConfigurer sheetStyle = builder -> {};
-
-    // new $T
-    private static final List<CellStyleConfigurer> headerStyleList = Collections.unmodifiableList(Arrays.asList());
-    // new $T
-    private static final List<CellStyleConfigurer> dataStyleList = Collections.unmodifiableList(Arrays.asList());
-    private static final List<String> columnNameList = Collections.unmodifiableList(Arrays.asList(" ","1", "3", "4"));
-    private static final List<Object> defaultValueList = Collections.unmodifiableList(Arrays.asList(new Object()));
-    private static final List<Function<DTO, Object>> getterList = Collections.unmodifiableList(Arrays.asList(DTO::getAge, DTO::getGrade));
+    private final SheetStyleConfigurer SheetStyle = builder -> {};
+    private final List<CellStyleConfigurer> headerStyleConfigList = Collections.unmodifiableList(Arrays.asList());
+    // new $
+    private final List<CellStyleConfigurer> dataStyleConfigList = Collections.unmodifiableList(Arrays.asList());
+    private final List<String> columnNameList = Collections.unmodifiableList(Arrays.asList(" ","1", "3", "4"));
+    private final List<String> defaultValueList = Collections.unmodifiableList(Arrays.asList(" ", null));
+    private final List<String> cellFormatList = Collections.unmodifiableList(Arrays.asList(" ", null));
+    private final List<Function<DTO, Object>> getterFunctionList = Collections.unmodifiableList(Arrays.asList(DTO::getAge, DTO::getGrade));
 
     static {
         RegisterManager.put(DTO.class, INSTANCE);
     }
 
-    private Generated_MetaData() {}
     @Override
-    public SheetStyleConfigurer getSheetStyleConfig() {
-        return sheetStyle;
+    public SheetStyleConfigurer getSheetStyle() {
+        return SheetStyle;
     }
 
     @Override
-    public List<CellStyleConfigurer> getHeaderStyleConfigs() {
-        return headerStyleList;
+    public List<CellStyleConfigurer> getHeaderStyleConfigList() {
+        return headerStyleConfigList;
     }
 
     @Override
-    public List<CellStyleConfigurer> getDataStyleConfigs() {
-        return dataStyleList;
+    public List<CellStyleConfigurer> getDataStyleConfigList() {
+        return dataStyleConfigList;
     }
 
     @Override
-    public List<String> getColumnNames() {
+    public List<String> getColumnNameList() {
         return columnNameList;
     }
 
     @Override
-    public List<Object> getDefaultValues() {
+    public List<String> getDefaultValueList() {
         return defaultValueList;
     }
 
     @Override
-    public List<Function<DTO, Object>> getGetterFunctions() {
-        return getterList;
+    public List<String> getCellFormatList() {
+        return cellFormatList;
+    }
+
+    @Override
+    public List<Function<DTO, Object>> getGetterFunctionList() {
+        return getterFunctionList;
     }
 }

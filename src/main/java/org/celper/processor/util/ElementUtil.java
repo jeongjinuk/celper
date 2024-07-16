@@ -1,13 +1,15 @@
 package org.celper.processor.util;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
@@ -20,9 +22,7 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,8 +37,8 @@ public final class ElementUtil {
                     .append(fieldName.substring(1));
 
     private static final Function<String, StringBuilder> buildExpectedFieldName = methodName -> {
-        String fieldName = methodName.split(GET_PREFIX)[0];
-        return new StringBuilder(fieldName.toLowerCase().charAt(0))
+        String fieldName = methodName.split(GET_PREFIX)[1];
+        return new StringBuilder(String.valueOf(fieldName.toLowerCase().charAt(0)))
                 .append(fieldName.substring(1));
     };
 
@@ -71,7 +71,10 @@ public final class ElementUtil {
         this.typeUtils = processingEnv.getTypeUtils();
         this.elementUtils = processingEnv.getElementUtils();
         this.messager = processingEnv.getMessager();
+    }
 
+    public void log(Diagnostic.Kind kind, String msg) {
+        messager.printMessage(kind, msg);
     }
 
     public List<VariableElement> getFieldsWithAnnotation(TypeElement clazz, Class<? extends Annotation> annotation) {
@@ -81,13 +84,12 @@ public final class ElementUtil {
                 .collect(Collectors.toList());
     }
 
-    public List<ExecutableElement> getMethods(Class<?> clazz){
-        return ElementFilter.methodsIn(elementUtils
-                        .getTypeElement(ClassName.get(clazz).reflectionName())
-                        .getEnclosedElements());
+    public List<ExecutableElement> getMethods(Class<?> clazz) {
+        return ElementFilter.methodsIn(elementUtils.getTypeElement(ClassName.get(clazz).reflectionName()).getEnclosedElements());
     }
 
-    public String generateFieldName(ExecutableElement method){
+
+    public String generateFieldName(ExecutableElement method) {
         return buildExpectedFieldName.apply(method.getSimpleName().toString()).toString();
     }
 
@@ -110,14 +112,28 @@ public final class ElementUtil {
                 .anyMatch(method -> matchesGetterSignature(method, field));
     }
 
-    public void log(Diagnostic.Kind kind, String msg) {
-        messager.printMessage(kind, msg);
+    // TODO 이거 확장성 때문에 나중에 생각해봐야함
+    public TypeName getTypeName(TypeMirror returnType, TypeName typeVar) {
+        switch (returnType.getKind()) {
+            case DECLARED:
+                DeclaredType declaredType = (DeclaredType) returnType;
+                ClassName className = ClassName.get((TypeElement) declaredType.asElement());
+                return declaredType.getTypeArguments().isEmpty() ?
+                        className : ParameterizedTypeName.get(className, declaredType.getTypeArguments()
+                                .stream()
+                                .map(typeMirror -> getTypeName(typeMirror, typeVar))
+                                .toArray(TypeName[] :: new));
+            case TYPEVAR:
+                return typeVar;
+            default:
+                return TypeName.get(returnType);
+        }
     }
 
 
     private TypeMirror convertToBoxedType(VariableElement field) {
         if (field.asType().getKind().isPrimitive()) {
-            return typeUtils.boxedClass((PrimitiveType) field).asType();
+            return typeUtils.boxedClass((PrimitiveType) field.asType()).asType();
         }
         return field.asType();
     }

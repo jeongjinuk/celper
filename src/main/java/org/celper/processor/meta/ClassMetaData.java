@@ -5,6 +5,8 @@ import org.celper.core.style.SheetStyleConfigurer;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ClassMetaData {
 
@@ -17,12 +19,15 @@ public class ClassMetaData {
         this.fieldAnnotationMetaDataList = fieldAnnotationMetaDataList;
     }
 
-    public TypeElement getClazz() {
-        return clazz;
+    public <R> List<R> getFieldList(Function<FieldAnnotationMetaData, R> function){
+        return fieldAnnotationMetaDataList.stream()
+                .map(function::apply)
+                .collect(Collectors.toList());
     }
 
-    public void setClazz(TypeElement clazz) {
-        this.clazz = clazz;
+
+    public TypeElement getClazz() {
+        return clazz;
     }
 
     public Class<SheetStyleConfigurer> getSheetStyleConfigurer() {
