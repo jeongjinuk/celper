@@ -50,7 +50,7 @@ public class ClassParser {
     }
     private ClassMetaData createClassMetaData(TypeElement clazz, List<FieldAnnotationMetaData> fieldAnnotationMetaData){
         ClassMetaData classMetaData = new ClassMetaData(clazz, fieldAnnotationMetaData);
-        AnnotationHandler.applyHandlersIfPresent(ClassAnnotationHandler.values(), clazz, classMetaData);
+        AnnotationHandler.applyHandlersIfPresent(ClassAnnotationHandler.values(), elementUtil, clazz, classMetaData);
         return classMetaData;
     }
 
@@ -68,7 +68,7 @@ public class ClassParser {
         metaData.setField(field);
         metaData.setDefinedFieldOrder(defindOrder);
         metaData.setGetterMethod(elementUtil.generateGetterName(field));
-        AnnotationHandler.applyHandlersIfPresent(FieldAnnotationHandler.values(), field, metaData);
+        AnnotationHandler.applyHandlersIfPresent(FieldAnnotationHandler.values(), elementUtil, field, metaData);
         return metaData;
     }
 

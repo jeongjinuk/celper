@@ -75,17 +75,11 @@ public final class ElementUtil {
         this.messager = processingEnv.getMessager();
     }
 
+
     public void log(Diagnostic.Kind kind, String msg) {
         messager.printMessage(kind, msg);
     }
-    public static TypeMirror getTypeMirror(Supplier<Class<?>> classSupplier) {
-        try{
-            classSupplier.get();
-        }catch (MirroredTypeException e){
-            return e.getTypeMirror();
-        }
-        return null;
-    }
+
 
     public List<VariableElement> getFieldsWithAnnotation(TypeElement clazz, Class<? extends Annotation> annotation) {
         return ElementFilter.fieldsIn(clazz.getEnclosedElements())
@@ -140,7 +134,18 @@ public final class ElementUtil {
         }
     }
 
+    public TypeMirror getTypeMirror(Supplier<Class<?>> classSupplier) {
+        try{
+            classSupplier.get();
+        }catch (MirroredTypeException e){
+            return e.getTypeMirror();
+        }
+        return null;
+    }
 
+    public boolean isSameType(TypeMirror typeMirror, Class<?> clazz){
+        return typeUtils.isSameType(typeMirror, elementUtils.getTypeElement(clazz.getCanonicalName()).asType());
+    }
     private TypeMirror convertToBoxedType(VariableElement field) {
         if (field.asType().getKind().isPrimitive()) {
             return typeUtils.boxedClass((PrimitiveType) field.asType()).asType();
@@ -154,4 +159,6 @@ public final class ElementUtil {
                 (method.getParameters().isEmpty() || method.getParameters().size() == 0) &&
                 typeUtils.isSameType(method.getReturnType(), field.asType());
     }
+
+
 }

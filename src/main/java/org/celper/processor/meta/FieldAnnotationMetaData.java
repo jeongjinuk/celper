@@ -15,7 +15,7 @@ public class FieldAnnotationMetaData implements Comparable<FieldAnnotationMetaDa
     private int definedFieldOrder;
     private String headerName;
 
-    private String CellFormat;
+    private String cellFormat;
 
     private String defaultValue;
 
