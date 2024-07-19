@@ -7,7 +7,6 @@ import org.celper.processor.util.ElementUtil;
 import org.celper.processor.validator.Validator;
 import org.celper.processor.validator.ValidatorFactory;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.tools.Diagnostic;

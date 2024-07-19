@@ -2,9 +2,9 @@ package org.celper.processor.meta;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.celper.core.style.CellStyleConfigurer;
 
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 
 @Getter
 @Setter
@@ -19,8 +19,8 @@ public class FieldAnnotationMetaData implements Comparable<FieldAnnotationMetaDa
 
     private String defaultValue;
 
-    private Class<CellStyleConfigurer> headerStyleConfigurer;
-    private Class<CellStyleConfigurer> dataStyleConfigurer;
+    private TypeMirror headerStyleConfigurerTypeMirror;
+    private TypeMirror dataStyleConfigurerTypeMirror;
 
     // construct
     public FieldAnnotationMetaData() {}

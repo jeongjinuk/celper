@@ -2,8 +2,6 @@ package org.celper.processor.generator;
 
 import com.squareup.javapoet.*;
 import org.celper.MetaData;
-import org.celper.core.style.CellStyleConfigurer;
-import org.celper.core.style.SheetStyleConfigurer;
 import org.celper.processor.meta.ClassMetaData;
 import org.celper.processor.meta.FieldAnnotationMetaData;
 import org.celper.processor.util.ElementUtil;
@@ -11,61 +9,57 @@ import org.celper.register.RegisterManager;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.type.TypeMirror;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * javapoet
- * $T = Type
- * $S = 문자열
- * $L = 리터럴 숫자, 문자 등등
- * $N = 변수명으로 접근가능
- * <p>
- * 필요
- * Element to TypeElement convert
- * getQualifiedName -> FQCN
- * getSimepleName -> ClassName
- * <p>
- * FQCN 풀패키지 + class이름
- * className = class 이름
- * generateClassFQCN = (FQCN - className) + "__Generate__Model<FQCN>";
- * generatedPackage = (FQCN - className) + generateClassFQCN;
- * <p>
- * static 블록 생성기
- * 여기서 RegisterManager.put(Class.class, new Generated___Model()); 이런식
- * <p>
- * <p>
- * 생성자 생성기 constructor
- * 여기서 필드 초기화
- * <p>
- * statement 생성기
- * this.sheetStyle = builder -> {};
- * this.headerStyleList = Collections.unmodifiableList(Arrays.asList());
- * this.dataStyleList = Collections.unmodifiableList(Arrays.asList());
- * this.columnNameList = Collections.unmodifiableList(Arrays.asList());
- * this.defaultValueList = Collections.unmodifiableList(Arrays.asList());
- * this.getterList = Collections.unmodifiableList(Arrays.asList(DTO::getAge, ...));
- * <p>
- * 필드 생성기
- * private SheetStyleConfigurer sheetStyle;
- * private List<CellStyleConfigurer> headerStyleList;
- * private List<CellStyleConfigurer> dataStyleList;
- * private List<String> columnNameList;
- * private List<Object> defaultValueList;
- * private List<Function<DTO, Object>> getterList;
- * <p>
- * <p>
- * 메서드 생성기
- * public SheetStyleConfigurer getSheetStyle();
- * public List<CellStyleConfigurer> getHeaderStyle();
- * public List<CellStyleConfigurer> getDataStyle();
- * public List<String> getColumnNames();
- * public List<Object> getDefaultValues();
- * public List<Function<T, Object>> getGetterList();
+ * @FQNC
+ * FQNC = Fully Qualified Class Name(클래스가 속한 패키지 이름을 포함하고, 다른 클래스와 충돌하지 않음.)
+ * 예) java.util.List<java.lang.Object> == List<Object>
+ *
+ * @필요_항목
+ * 1. DTO 클래스의 FQNC
+ * 2. MetaData interface FQNC
+ * 3. Generate Class Name
+ * 4. Generate Class FQNC
+ *
+ * @대응_명칭
+ * 1. ClassName targetClassFQNC = ClassName.get(classMetaData.getClazz());
+ * 2. ClassName interfaceFQNC = ClassName.get(MetaData.class);
+ * 3. String generatedClassName = targetClassFQNC.simpleName() + SUFFIX;
+ * 4. ClassName generatedClassFQNC = ClassName.get(targetClassFQNC.packageName(), generatedClassName);
+ *
+ *
+ * @가안
+ * package [ targetClassFQNC.getPackageName() ];
+ *
+ * @import_javapoet에_의해_생성
+ * import org.celper.core.style.*;
+ * import org.celper.register.RegisterManager;
+ * import java.util.*;
+ * import java.util.function.*;
+ *
+ * @추가_설명 (null 또는 오브젝트 형태로 만든 이유는 기본값을 기본형으로 처리하기 힘들다. 그리고 optional도 고려를 했는데, 이부분에서는 더 복잡해지고 차후 추가될 로직에 대해 알기 어려워서 null로 처리)
+ * public final class [ generatedClassName ] implements [ interfaceFQNC ]<[ targetClassFQNC ]> {
+ *     private static final [ interfaceFQNC ]<[ targetClassFQNC ]> INSTANCE = new [ generatedClassFQNC ]();
+ *     private final SheetStyleConfigurer SheetStyle = [ null or SheetStyleConfig ];
+ *     private final List<CellStyleConfigurer> headerStyleConfigList = Collections.unmodifiableList(Arrays.asList( [ null or CellStyleConfig ] ));
+ *     private final List<CellStyleConfigurer> dataStyleConfigList = Collections.unmodifiableList(Arrays.asList( [ null or CellStyleConfig ] ));
+ *     private final List<String> columnNameList = Collections.unmodifiableList(Arrays.asList( [ null or String Type ] ));
+ *     private final List<String> defaultValueList = Collections.unmodifiableList(Arrays.asList( [ null or String Type ] ));
+ *     private final List<String> cellFormatList = Collections.unmodifiableList(Arrays.asList( [ null or String Type ] ));
+ *     private final List<Function<DTO, Object>> getterFunctionList = Collections.unmodifiableList(Arrays.asList( [ null or targetClassFQNC :: getterMethodName ] ));
+ *
+ *     static {
+ *         RegisterManager.put([ targetClassFQNC ], INSTANCE);
+ *     }
+ * @MetaData_interface_Overrided_Methods...
+ * }
  */
 public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
 
-    private static final String suffix = "_MetaData";
+    private static final String SUFFIX = "_MetaData";
 
     private final ElementUtil elementUtil;
 
@@ -75,40 +69,11 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
 
     @Override
     public JavaFile generate(ClassMetaData classMetaData) {
+        ClassName targetClassFQNC = ClassName.get(classMetaData.getClazz()); // DTO FQNC
+        ClassName interfaceFQNC = ClassName.get(MetaData.class); // interface MetaData FQNC
+        String generatedClassName = targetClassFQNC.simpleName() + SUFFIX; // generate Class Name
+        ClassName generatedClassFQNC = ClassName.get(targetClassFQNC.packageName(), generatedClassName); // generated Class FQNC
 
-        /**
-         * 필요한거
-         *
-         * 1. 풀패키지 경로 -> dto 클래스 경로에서 dto만 제외
-         * 2. dto 클래스 이름
-         * 3. 만들어질 generate 클래스
-         * 4. generate_MetaData -> 타입 생성 ParameterizedTypeName.get(1 경로, 2dto + suffix)
-         * 5. TypeSpec에서 supperInterface(4)
-         *
-         * private static final org.example.Temp<org.example.DTO> INSTANCE = new org.example.DTO_Generate(); 이렇게 나오는 것 까진 확인
-         */
-        ClassName targetClassFQNC = ClassName.get(classMetaData.getClazz());
-        ClassName interfaceFQNC = ClassName.get(MetaData.class);
-        String generatedClassName = targetClassFQNC.simpleName() + suffix;
-        ClassName generatedClassFQNC = ClassName.get(targetClassFQNC.packageName(), generatedClassName);
-
-
-        /**
-         *
-         * 필드 타입 == 메서드 리턴
-         * 재사용
-         * Map<MethodSpec, fieldName> 형으로 반환
-         * -> 요렇게 해서 stream으로 파싱? 이게 맞네
-         *
-         * 들고 오는거 까지는 ok
-         * ClassMetaData의 필드랑 매핑 시키는건? 걍 박으면 의미가 하나도 없는데
-         * 구현까진 만들 수 있는데 의미가 없는데 반자동화 수준?
-         * 맞음?
-         * 뒤에는 바뀔 수 있다? 자동화시킨다고 해도 명칭이 달라서 불가능 어케 만들건데
-         * ClassMetaData
-         * $N
-         *
-         */
         List<ExecutableElement> methods = elementUtil.getMethods(MetaData.class);
         List<FieldSpec> fields = createFields(methods, classMetaData, targetClassFQNC, interfaceFQNC, generatedClassFQNC);
         List<MethodSpec> methodSpecs = methods
@@ -116,14 +81,6 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
                 .map(s -> createGetterMethod(s, targetClassFQNC))
                 .collect(Collectors.toList());
 
-        /**
-         *
-         *        TypeSpec generatedMetaDataClass = TypeSpec.classBuilder(generatedMetaData)
-         *                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-         *                 .addSuperinterface(ParameterizedTypeName.get(metaData, dto)) // 상속받게 해야함
-         *                 .addField(instanceField)
-         *                 .build();
-         */
         TypeSpec buildClass = TypeSpec.classBuilder(generatedClassFQNC)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(ParameterizedTypeName.get(interfaceFQNC, targetClassFQNC))
@@ -132,10 +89,7 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
                 .addMethod(createConstructor())
                 .addMethods(methodSpecs)
                 .build();
-        System.out.println();
-        System.out.println(targetClassFQNC.packageName() + buildClass + "--------");
-        System.out.println();
-        JavaFile build = JavaFile.builder(targetClassFQNC.packageName(), buildClass).build();
+
         return JavaFile.builder(targetClassFQNC.packageName(), buildClass).build();
     }
 
@@ -147,7 +101,7 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
 
     private List<FieldSpec> createFields(List<ExecutableElement> methods,
                                          ClassMetaData classMetaData,
-                                         ClassName targetClass,
+                                         ClassName targetClassFQNC,
                                          ClassName interfaceFQNC,
                                          ClassName generatedClassFQNC) {
         Map<String, ExecutableElement> methodMap = methods.stream()
@@ -156,41 +110,43 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
                         method -> method,
                         (o1, o2) -> o1));
 
-        Class<SheetStyleConfigurer> sheetStyleConfigurer = classMetaData.getSheetStyleConfigurer();
-        List<Class<CellStyleConfigurer>> headerStyles = classMetaData.getFieldList(FieldAnnotationMetaData :: getHeaderStyleConfigurer);
-        List<Class<CellStyleConfigurer>> dataStyles = classMetaData.getFieldList(FieldAnnotationMetaData :: getDataStyleConfigurer);
+        TypeMirror sheetStyleConfigurer = classMetaData.getSheetStyleConfigurerTypeMirror(); // TODO 수정
+        List<TypeMirror> headerStyles = classMetaData.getFieldList(FieldAnnotationMetaData :: getHeaderStyleConfigurerTypeMirror);
+        List<TypeMirror> dataStyles = classMetaData.getFieldList(FieldAnnotationMetaData :: getDataStyleConfigurerTypeMirror);
         List<String> headerNames = classMetaData.getFieldList(FieldAnnotationMetaData :: getHeaderName);
         List<String> cellFormats = classMetaData.getFieldList(FieldAnnotationMetaData :: getCellFormat);
-        List<String> getters = classMetaData.getFieldList(FieldAnnotationMetaData :: getGetterMethod);
         List<String> defaultValues = classMetaData.getFieldList(FieldAnnotationMetaData :: getDefaultValue);
+        List<String> getters = classMetaData.getFieldList(FieldAnnotationMetaData :: getGetterMethod);
 
         return Arrays.asList(
-                createInstanceField(interfaceFQNC, generatedClassFQNC),
+                createInstanceField(interfaceFQNC, generatedClassFQNC, targetClassFQNC),
                 createSheetStyleField(methodMap.get("getSheetStyle"), sheetStyleConfigurer),
                 createCellStyleConfigList(methodMap.get("getHeaderStyleConfigList"), headerStyles),
                 createCellStyleConfigList(methodMap.get("getDataStyleConfigList"), dataStyles),
                 createStringList(methodMap.get("getColumnNameList"), headerNames),
                 createStringList(methodMap.get("getDefaultValueList"), defaultValues),
                 createStringList(methodMap.get("getCellFormatList"), cellFormats),
-                createFunctionList(methodMap.get("getGetterFunctionList"), getters, targetClass));
+                createFunctionList(methodMap.get("getGetterFunctionList"), getters, targetClassFQNC));
     }
 
-    private FieldSpec createInstanceField(ClassName interfaceFQNC, ClassName generatedClassFQNC) {
-        return FieldSpec.builder(interfaceFQNC, "INSTANCE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+    private FieldSpec createInstanceField(ClassName interfaceFQNC,
+                                          ClassName generatedClassFQNC,
+                                          ClassName targetClassFQNC) {
+        return FieldSpec.builder(ParameterizedTypeName.get(interfaceFQNC, targetClassFQNC), "INSTANCE")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .initializer("new $T()", generatedClassFQNC)
                 .build();
     }
 
-    private FieldSpec createSheetStyleField(ExecutableElement method, Class<?> clazz) {
+    private FieldSpec createSheetStyleField(ExecutableElement method, TypeMirror styleTypeMirror) {
         TypeName fieldType = elementUtil.getTypeName(method.getReturnType(), null);
         String fieldName = elementUtil.generateFieldName(method);
         CodeBlock initBlock = CodeBlock.builder()
                 .add("null")
                 .build();
-
-        if (Objects.nonNull(clazz)) {
+        if (Objects.nonNull(styleTypeMirror)) {
             initBlock = CodeBlock.builder()
-                    .add("new $T()", ClassName.get(clazz))
+                    .add("new $T()", styleTypeMirror)
                     .build();
         }
 
@@ -221,7 +177,7 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
         return builder.build();
     }
 
-    private FieldSpec createCellStyleConfigList(ExecutableElement method, List<Class<CellStyleConfigurer>> list) {
+    private FieldSpec createCellStyleConfigList(ExecutableElement method, List<TypeMirror> list) {
         TypeName fieldType = elementUtil.getTypeName(method.getReturnType(), null);
         String fieldName = elementUtil.generateFieldName(method);
         return FieldSpec.builder(fieldType, fieldName, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
@@ -229,28 +185,29 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
                 .build();
     }
 
-    private CodeBlock initializerClassTypeList(List<Class<CellStyleConfigurer>> list) {
+    private CodeBlock initializerClassTypeList(List<TypeMirror> list) {
         CodeBlock.Builder builder = CodeBlock.builder()
                 .add("$T.unmodifiableList($T.asList(", Collections.class, Arrays.class);
         int size = list.size();
         for (int i = 0; i < size - 1; i++) {
-            Class<CellStyleConfigurer> val = list.get(i);
+            TypeMirror val = list.get(i);
             if (val == null) {
                 builder.add("null");
             } else {
-                builder.add("new $T()", ClassName.get(val));
+                builder.add("new $T()", val);
             }
             builder.add(", ");
         }
-        Class<CellStyleConfigurer> val = list.get(size - 1);
+        TypeMirror val = list.get(size - 1);
         if (val == null) {
             builder.add("null");
         } else {
-            builder.add("new $T()", ClassName.get(val));
+            builder.add("new $T()", val);
         }
         builder.add("))");
         return builder.build();
     }
+
 
     private FieldSpec createStringList(ExecutableElement method, List<String> list) {
         TypeName fieldType = elementUtil.getTypeName(method.getReturnType(), null);
@@ -290,15 +247,12 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
                 .build();
     }
 
-
     private MethodSpec createGetterMethod(ExecutableElement method, TypeName typeVar) {
         String methodName = method.getSimpleName().toString();
         String fieldName = elementUtil.generateFieldName(method);
         TypeName returnType = elementUtil.getTypeName(method.getReturnType(), typeVar);
-
         return createGetterMethod(methodName, fieldName, returnType);
     }
-
 
     private MethodSpec createGetterMethod(String methodName, String fieldName, TypeName returnType) {
         return MethodSpec.methodBuilder(methodName)
@@ -308,6 +262,4 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
                 .addStatement("return $N", fieldName)
                 .build();
     }
-
-
 }

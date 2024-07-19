@@ -2,8 +2,8 @@ package org.celper.processor;
 
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeSpec;
 import org.celper.ExcelModel;
+import org.celper.core.style.SheetStyleConfigurer;
 import org.celper.processor.generator.ClassGenerator;
 import org.celper.processor.meta.ClassMetaData;
 import org.celper.processor.parser.ClassParser;
@@ -14,7 +14,10 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -55,9 +58,7 @@ public class ExcelProcessor extends AbstractProcessor {
                 .filter(Optional :: isPresent)
                 .map(Optional :: get)
                 .collect(Collectors.toList());
-
         elementUtil.log(Diagnostic.Kind.NOTE, READY_TO_GENERATED_CLASSES_LIST_LOG_MSG.apply(classMetaDataList));
-        // classMetaData -> generated Class
         for (ClassMetaData classMetaData : classMetaDataList) {
             write(classGenerator.generate(classMetaData));
         }
@@ -66,12 +67,8 @@ public class ExcelProcessor extends AbstractProcessor {
 
 
     private void write(JavaFile javaFile){
-        System.out.println("클래스 write");
-        System.out.println(javaFile.packageName);
-        System.out.println(javaFile.packageName.length() == 0);
-        System.out.println(javaFile.typeSpec.name);
         String fqnc = javaFile.packageName.length() == 0 ? javaFile.typeSpec.name : javaFile.packageName + "." + javaFile.typeSpec.name;
-        try(Writer writer = processingEnv.getFiler().createSourceFile(fqnc).openWriter()){
+        try(Writer writer = new OutputStreamWriter(processingEnv.getFiler().createSourceFile(fqnc).openOutputStream(), StandardCharsets.UTF_8)){
             javaFile.writeTo(writer);
         }catch (IOException e){
             e.printStackTrace();

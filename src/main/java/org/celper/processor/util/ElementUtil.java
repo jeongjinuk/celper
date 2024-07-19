@@ -10,6 +10,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
@@ -25,6 +26,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class ElementUtil {
@@ -75,6 +77,14 @@ public final class ElementUtil {
 
     public void log(Diagnostic.Kind kind, String msg) {
         messager.printMessage(kind, msg);
+    }
+    public static TypeMirror getTypeMirror(Supplier<Class<?>> classSupplier) {
+        try{
+            classSupplier.get();
+        }catch (MirroredTypeException e){
+            return e.getTypeMirror();
+        }
+        return null;
     }
 
     public List<VariableElement> getFieldsWithAnnotation(TypeElement clazz, Class<? extends Annotation> annotation) {

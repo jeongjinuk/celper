@@ -4,8 +4,8 @@ import org.celper.CellFormat;
 import org.celper.Column;
 import org.celper.ColumnStyle;
 import org.celper.DefaultValue;
-import org.celper.core.style.CellStyleConfigurer;
 import org.celper.processor.meta.FieldAnnotationMetaData;
+import org.celper.processor.util.ElementUtil;
 
 import javax.lang.model.element.VariableElement;
 import java.lang.annotation.Annotation;
@@ -31,8 +31,8 @@ public enum FieldAnnotationHandler implements AnnotationHandler<VariableElement,
 
     COLUMN_STYLE(ColumnStyle.class, (annotation, metaData) -> {
         ColumnStyle columnStyle = (ColumnStyle) annotation;
-        metaData.setHeaderStyleConfigurer((Class<CellStyleConfigurer>) columnStyle.headerAreaStyle());
-        metaData.setDataStyleConfigurer((Class<CellStyleConfigurer>) columnStyle.dataAreaStyle());
+        metaData.setHeaderStyleConfigurerTypeMirror(ElementUtil.getTypeMirror(columnStyle::headerAreaStyle));
+        metaData.setDataStyleConfigurerTypeMirror(ElementUtil.getTypeMirror(columnStyle::dataAreaStyle));
     });
 
     private final Class<? extends Annotation> type;

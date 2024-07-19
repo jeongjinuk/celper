@@ -1,8 +1,8 @@
 package org.celper.processor.parser;
 
 import org.celper.SheetStyle;
-import org.celper.core.style.SheetStyleConfigurer;
 import org.celper.processor.meta.ClassMetaData;
+import org.celper.processor.util.ElementUtil;
 
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 public enum ClassAnnotationHandler implements AnnotationHandler<TypeElement, ClassMetaData>{
     COLUMN(SheetStyle.class, (annotation, classMetaData) -> {
         SheetStyle sheetStyle = (SheetStyle) annotation;
-        classMetaData.setSheetStyleConfigurer((Class<SheetStyleConfigurer>) sheetStyle.value());
+        classMetaData.setSheetStyleConfigurerTypeMirror(ElementUtil.getTypeMirror(sheetStyle::value));
     });
 
     private final Class<? extends Annotation> type;
@@ -22,6 +22,7 @@ public enum ClassAnnotationHandler implements AnnotationHandler<TypeElement, Cla
         this.type = type;
         this.ifPresent = ifPresent;
     }
+
     @Override
     public void ifPresent(TypeElement clazz,
                          ClassMetaData metaData) {
