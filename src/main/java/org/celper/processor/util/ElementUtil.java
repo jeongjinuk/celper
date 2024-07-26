@@ -39,11 +39,10 @@ public final class ElementUtil {
                     .append(fieldName.substring(1));
 
     private static final Function<String, StringBuilder> buildExpectedFieldName = methodName -> {
-        String fieldName = methodName.split(GET_PREFIX)[1];
+        String fieldName = methodName.replaceFirst(GET_PREFIX, "");
         return new StringBuilder(String.valueOf(fieldName.toLowerCase().charAt(0)))
                 .append(fieldName.substring(1));
     };
-
 
     private enum SupportType {
         INTEGER(Integer.class),

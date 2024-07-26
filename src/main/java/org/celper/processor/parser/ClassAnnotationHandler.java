@@ -1,5 +1,6 @@
 package org.celper.processor.parser;
 
+import org.celper.CSVConfig;
 import org.celper.SheetStyle;
 import org.celper.core.style._NoCellStyle;
 import org.celper.processor.meta.ClassMetaData;
@@ -11,12 +12,17 @@ import java.lang.annotation.Annotation;
 import java.util.Objects;
 
 public enum ClassAnnotationHandler implements AnnotationHandler<TypeElement, ClassMetaData>{
-    COLUMN(SheetStyle.class, (annotation, classMetaData, elementUtil) -> {
+    SHEET_STYLE(SheetStyle.class, (annotation, classMetaData, elementUtil) -> {
         SheetStyle sheetStyle = (SheetStyle) annotation;
         TypeMirror typeMirror = elementUtil.getTypeMirror(sheetStyle :: value);
         typeMirror = elementUtil.isSameType(typeMirror, _NoCellStyle.class) ? null : typeMirror;
         classMetaData.setSheetStyleConfigurerTypeMirror(typeMirror);
-    });
+    }),
+    CSV_CONFIG(CSVConfig.class, (annotation, classMetaData, elementUtil) -> {
+        CSVConfig csvModel = (CSVConfig) annotation;
+        classMetaData.setCsvConfig(new String[]{csvModel.delimiter(), csvModel.prefix(), csvModel.suffix()});
+    })
+    ;
 
     private final Class<? extends Annotation> type;
     private final TriConsumer<Annotation, ClassMetaData, ElementUtil> ifPresent;

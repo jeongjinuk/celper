@@ -3,6 +3,7 @@ package org.celper;
 import org.celper.core.style.CellStyleConfigurer;
 import org.celper.core.style.SheetStyleConfigurer;
 
+import java.io.Writer;
 import java.util.List;
 import java.util.function.Function;
 
@@ -19,4 +20,5 @@ public interface MetaData<T> {
     List<String> getDefaultValueList();
     List<String> getCellFormatList();
     List<Function<T, Object>> getGetterFunctionList();
+    String[] getCsvConfig();
 }
