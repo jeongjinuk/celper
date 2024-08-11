@@ -8,7 +8,6 @@ import org.celper.tutorial.style_tutorial.HelloSheetStyle;
 
 import java.time.LocalDate;
 
-@SheetStyle(HelloSheetStyle.class)
 public class StudentModel {
     @Column("이름")
     @ColumnStyle(headerAreaStyle = HelloCellStyle.class)

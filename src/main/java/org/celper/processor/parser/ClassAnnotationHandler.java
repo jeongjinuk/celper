@@ -1,8 +1,8 @@
 package org.celper.processor.parser;
 
 import org.celper.CSVConfig;
+import org.celper.SheetLayout;
 import org.celper.SheetStyle;
-import org.celper.core.style._NoCellStyle;
 import org.celper.processor.meta.ClassMetaData;
 import org.celper.processor.util.ElementUtil;
 
@@ -15,12 +15,22 @@ public enum ClassAnnotationHandler implements AnnotationHandler<TypeElement, Cla
     SHEET_STYLE(SheetStyle.class, (annotation, classMetaData, elementUtil) -> {
         SheetStyle sheetStyle = (SheetStyle) annotation;
         TypeMirror typeMirror = elementUtil.getTypeMirror(sheetStyle :: value);
-        typeMirror = elementUtil.isSameType(typeMirror, _NoCellStyle.class) ? null : typeMirror;
         classMetaData.setSheetStyleConfigurerTypeMirror(typeMirror);
+    }),
+    SHEET_LAYOUT_CONFIG(SheetLayout.class, (annotation, classMetaData, elementUtil) -> {
+        SheetLayout sheetLayout = (SheetLayout) annotation;
+        TypeMirror typeMirror = elementUtil.getTypeMirror(sheetLayout  :: value);
+        classMetaData.setSheetLayoutConfigurerTypeMirror(typeMirror);
     }),
     CSV_CONFIG(CSVConfig.class, (annotation, classMetaData, elementUtil) -> {
         CSVConfig csvModel = (CSVConfig) annotation;
-        classMetaData.setCsvConfig(new String[]{csvModel.delimiter(), csvModel.prefix(), csvModel.suffix()});
+
+        String lineDelimiter = !csvModel.lineDelimiter().isEmpty() ? csvModel.lineDelimiter() : CSVConfig.DefaultCSVConfig.LINE_DELIMITER_CR.getStr();
+        String fieldSeparator = !csvModel.fieldSeparator().isEmpty() ? csvModel.fieldSeparator() : CSVConfig.DefaultCSVConfig.FIELD_SEPARATOR.getStr();
+        String quoteStrategy = csvModel.quote() != '\0'? String.valueOf(csvModel.quote()) : CSVConfig.DefaultCSVConfig.QUOTE_STRATEGY.getStr();
+        String commentPrefix = !csvModel.comment().isEmpty() ? csvModel.comment() :CSVConfig.DefaultCSVConfig.COMMENT_PREFIX.getStr();
+
+        classMetaData.setCsvConfig(new String[]{lineDelimiter, fieldSeparator, quoteStrategy, commentPrefix});
     })
     ;
 

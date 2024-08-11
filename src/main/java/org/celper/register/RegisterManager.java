@@ -20,8 +20,7 @@ public final class RegisterManager {
                     .forEach(RegisterManager::initializeClass);
         }
     }
-    // TODO Lazy initialize 형태로?
-    public static void initializeClass(Class<?> clazz) {
+    private static void initializeClass(Class<?> clazz) {
         try{
             Class.forName(clazz.getName(), true, clazz.getClassLoader());
             log.info("initialized Class : [" + clazz.getName() + "]");

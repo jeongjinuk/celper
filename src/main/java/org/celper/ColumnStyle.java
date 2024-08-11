@@ -1,7 +1,7 @@
 package org.celper;
 
-import org.celper.core.style.CellStyleConfigurer;
-import org.celper.core.style._NoCellStyle;
+import org.celper.core2.style.CellStyleConfigurer;
+import org.celper.core2.style._NoCellStyle;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

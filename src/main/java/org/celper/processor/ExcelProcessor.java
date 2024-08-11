@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes({
         "org.celper.ExcelModel",
+        "org.celper.SheetLayout",
         "org.celper.SheetStyle",
         "org.celper.Column",
         "org.celper.ColumnStyle",

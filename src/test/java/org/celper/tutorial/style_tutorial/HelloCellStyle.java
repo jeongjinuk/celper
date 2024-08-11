@@ -1,6 +1,7 @@
 package org.celper.tutorial.style_tutorial;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.celper.core.style.CellStyleConfigurer;
 import org.celper.core.style.builder.CellStyleBuilder;
 

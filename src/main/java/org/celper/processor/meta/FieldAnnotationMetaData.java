@@ -26,7 +26,6 @@ public class FieldAnnotationMetaData implements Comparable<FieldAnnotationMetaDa
     public FieldAnnotationMetaData() {}
 
     // getters and setters
-
     @Override
     public int compareTo(FieldAnnotationMetaData o) {
         if (this.priority == 0 && o.getPriority() == 0)

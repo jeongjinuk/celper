@@ -9,7 +9,6 @@ import java.time.LocalDate;
 /**
  *
  */
-@SheetStyle(HelloSheetStyle.class)
 public class StudentModel {
     @Column("이름")
     private String name;

@@ -99,6 +99,7 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
                         (o1, o2) -> o1));
 
         TypeMirror sheetStyleConfigurer = classMetaData.getSheetStyleConfigurerTypeMirror();
+        TypeMirror sheetLayoutConfigurer = classMetaData.getSheetLayoutConfigurerTypeMirror();
         String[] csvConfig = classMetaData.getCsvConfig();
         List<TypeMirror> headerStyles = classMetaData.getFieldList(FieldAnnotationMetaData :: getHeaderStyleConfigurerTypeMirror);
         List<TypeMirror> dataStyles = classMetaData.getFieldList(FieldAnnotationMetaData :: getDataStyleConfigurerTypeMirror);
@@ -110,7 +111,8 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
         return Arrays.asList(
                 createInstanceField(interfaceFQNC, generatedClassFQNC, targetClassFQNC),
                 createCSVConfigField(csvConfig),
-                createSheetStyleField(methodMap.get("getSheetStyle"), sheetStyleConfigurer),
+                createObjectField(methodMap.get("getSheetLayout"), sheetLayoutConfigurer),
+                createObjectField(methodMap.get("getSheetStyle"), sheetStyleConfigurer),
                 createCellStyleConfigList(methodMap.get("getHeaderStyleConfigList"), headerStyles),
                 createCellStyleConfigList(methodMap.get("getDataStyleConfigList"), dataStyles),
                 createStringList(methodMap.get("getColumnNameList"), headerNames),
@@ -128,7 +130,7 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
                 .build();
     }
 
-    private FieldSpec createSheetStyleField(ExecutableElement method, TypeMirror styleTypeMirror) {
+    private FieldSpec createObjectField(ExecutableElement method, TypeMirror styleTypeMirror) {
         TypeName fieldType = elementUtil.getTypeName(method.getReturnType(), null);
         String fieldName = elementUtil.generateFieldName(method);
         CodeBlock initBlock = CodeBlock.builder()
@@ -213,7 +215,7 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
         for (int i = 0; i < size - 1; i++) {
             String val = list.get(i);
             if (val == null) {
-                builder.add("null");
+                builder.add("\"\"");
             } else {
                 builder.add("$S", val);
             }
@@ -221,7 +223,7 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
         }
         String val = list.get(size - 1);
         if (val == null) {
-            builder.add("null");
+            builder.add("\"\"");
         } else {
             builder.add("$S", val);
         }
@@ -235,7 +237,8 @@ public class ClassGenerator implements Generator<ClassMetaData, JavaFile> {
     }
     private FieldSpec createCSVConfigField(String[] config) {
         return FieldSpec.builder(String[].class, "csvConfig", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                .initializer(CodeBlock.of("new $T{$S, $S, $S}", String[].class, config[0], config[1], config[2]))
+                // TODO 이거 나중에 자동화
+                .initializer(CodeBlock.of("new $T{$S, $S, $S, $S}", String[].class, config[0], config[1], config[2], config[3]))
                 .build();
     }
     private MethodSpec createMethod(ExecutableElement method, TypeName typeVar) {

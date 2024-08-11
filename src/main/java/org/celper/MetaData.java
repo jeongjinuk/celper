@@ -1,9 +1,8 @@
 package org.celper;
 
-import org.celper.core.style.CellStyleConfigurer;
-import org.celper.core.style.SheetStyleConfigurer;
+import org.celper.core2.style.CellStyleConfigurer;
+import org.celper.core2.style.SheetLayoutConfigurer;
 
-import java.io.Writer;
 import java.util.List;
 import java.util.function.Function;
 
@@ -13,7 +12,8 @@ import java.util.function.Function;
  *
  */
 public interface MetaData<T> {
-    SheetStyleConfigurer getSheetStyle();
+    SheetLayoutConfigurer getSheetLayout();
+    CellStyleConfigurer getSheetStyle();
     List<CellStyleConfigurer> getHeaderStyleConfigList();
     List<CellStyleConfigurer> getDataStyleConfigList();
     List<String> getColumnNameList();

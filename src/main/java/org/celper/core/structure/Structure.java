@@ -85,17 +85,17 @@ public class Structure {
     }
     private void setSheetStyleConfigurer(Class<?> clazz) {
         if (clazz.isAnnotationPresent(SheetStyle.class)){
-            this.sheetStyleConfigurer = ReflectionUtils.getInstance(clazz.getDeclaredAnnotation(SheetStyle.class).value());
+//            this.sheetStyleConfigurer = ReflectionUtils.getInstance(clazz.getDeclaredAnnotation(SheetStyle.class).value());
         }
     }
     private void setCellStyleConfigurer(){
         if (this.field.isAnnotationPresent(ColumnStyle.class)){
             ColumnStyle annotation = this.field.getDeclaredAnnotation(ColumnStyle.class);
             if (!_NoCellStyle.class.equals(annotation.headerAreaStyle())){
-                this.headerAreaConfigurer = ReflectionUtils.getInstance(annotation.headerAreaStyle());
+//                this.headerAreaConfigurer = ReflectionUtils.getInstance(annotation.headerAreaStyle());
             }
             if (!_NoCellStyle.class.equals(annotation.dataAreaStyle())){
-                this.dataAreaConfigurer = ReflectionUtils.getInstance(annotation.dataAreaStyle());
+//                this.dataAreaConfigurer = ReflectionUtils.getInstance(annotation.dataAreaStyle());
             }
         }
     }
