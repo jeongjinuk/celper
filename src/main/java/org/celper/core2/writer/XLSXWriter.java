@@ -8,7 +8,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.celper.MetaData;
-import org.celper.core2.Util;
+import org.celper.core2.common.Util;
 import org.celper.core2.style.CellStyleConfigurer;
 import org.celper.core2.style.builder.CellStyleBuilder;
 import org.slf4j.Logger;

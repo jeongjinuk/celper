@@ -1,4 +1,4 @@
-package org.celper.core2;
+package org.celper.core2.common;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.RichTextString;
