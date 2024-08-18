@@ -2,8 +2,8 @@ package org.celper;
 
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.celper.core2.common.CSVQuoteStrategy;
-import org.celper.core2.writer.*;
+import org.celper.core.common.CSVQuoteStrategy;
+import org.celper.core.writer.*;
 import org.celper.register.RegisterManager;
 
 import java.io.Writer;

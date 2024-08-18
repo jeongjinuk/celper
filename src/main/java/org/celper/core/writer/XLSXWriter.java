@@ -1,4 +1,4 @@
-package org.celper.core2.writer;
+package org.celper.core.writer;
 
 import lombok.Getter;
 import org.apache.poi.ss.usermodel.Cell;
@@ -8,9 +8,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.celper.MetaData;
-import org.celper.core2.common.Util;
-import org.celper.core2.style.CellStyleConfigurer;
-import org.celper.core2.style.builder.CellStyleBuilder;
+import org.celper.core.common.Util;
+import org.celper.core.style.CellStyleConfigurer;
+import org.celper.core.style.builder.CellStyleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class XLSXWriter<T>{
     private final List<CellStyle> dataStyles;
     private final int colCount;
 
-    private XLSXWriter(WriterBuilder<T> builder) {
+    XLSXWriter(WriterBuilder<T> builder) {
         this.workBook = builder.getWorkBook();
         this.metaData = builder.getMetaData();
         this.headerStyles = builder.getHeaderStyles();

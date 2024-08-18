@@ -1,7 +1,7 @@
 package org.celper;
 
-import org.celper.core2.style.CellStyleConfigurer;
-import org.celper.core2.style.SheetLayoutConfigurer;
+import org.celper.core.style.CellStyleConfigurer;
+import org.celper.core.style.SheetLayoutConfigurer;
 
 import java.util.List;
 import java.util.function.Function;

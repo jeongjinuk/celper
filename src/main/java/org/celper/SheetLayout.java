@@ -1,6 +1,6 @@
 package org.celper;
 
-import org.celper.core2.style.SheetLayoutConfigurer;
+import org.celper.core.style.SheetLayoutConfigurer;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

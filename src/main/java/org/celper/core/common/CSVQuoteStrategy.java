@@ -1,4 +1,4 @@
-package org.celper.core2.common;
+package org.celper.core.common;
 
 public enum CSVQuoteStrategy {
     DOUBLE_QUOTE("\""),

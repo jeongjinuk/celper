@@ -1,7 +1,9 @@
-package org.celper.core2.writer;
+package org.celper.core.writer;
 
 import lombok.Getter;
-import org.celper.core2.common.CSVQuoteStrategy;
+import org.celper.core.common.CSVQuoteStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -16,6 +18,7 @@ import java.util.stream.StreamSupport;
 
 
 public class CSVWriter<T> implements Closeable {
+    Logger log = LoggerFactory.getLogger(CSVWriter.class);
     private final Writer writer;
     private final List<Function<T, Object>> getters; // T 타입의 필드 가져오는 방법
     private final List<String> columnNames;
@@ -28,7 +31,7 @@ public class CSVWriter<T> implements Closeable {
 
     private int fieldLength;
 
-    private CSVWriter(WriterBuilder<T> builder) {
+    CSVWriter(WriterBuilder<T> builder) {
         this.writer = builder.getWriter();
         this.getters = builder.getGetters();
         this.defaultValues = builder.getDefaultValues();
@@ -43,7 +46,6 @@ public class CSVWriter<T> implements Closeable {
         this.csvQuoteStrategy = builder.getCsvQuoteStrategies();
 
     }
-
     public void writeRecords(Iterable<T> values) {
         try {
             writer.write(joining(columnNames.iterator()));
@@ -56,7 +58,6 @@ public class CSVWriter<T> implements Closeable {
         }
 
     }
-
     public void writeRecord(String defaultValue, String... values){
         try {
             defaultValue = Objects.toString(defaultValue, "");
@@ -69,7 +70,6 @@ public class CSVWriter<T> implements Closeable {
             throw new UncheckedIOException(e);
         }
     }
-
     public void writeComment(String comment) {
         try {
             writer.write(commentPrefix + comment + lineDelimiter);
@@ -87,6 +87,7 @@ public class CSVWriter<T> implements Closeable {
             throw new UncheckedIOException(e);
         }
     }
+
     private void writeField(int idx, String value, String defaultValue) throws IOException{
         if (idx > 0 && fieldLength > 1) writer.write(fieldSeparator);
         String field = Objects.toString(value, defaultValue);
