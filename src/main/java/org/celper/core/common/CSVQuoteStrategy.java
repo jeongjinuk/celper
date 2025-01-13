@@ -20,4 +20,8 @@ public enum CSVQuoteStrategy {
     public boolean contains(String str) {
         return str.contains(charSequence);
     }
+
+    public char getChar() {
+        return charSequence.charAt(0);
+    }
 }

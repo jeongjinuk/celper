@@ -1,5 +1,7 @@
 package org.celper.core.reader;
 
+import org.celper.core.common.CSVQuoteStrategy;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
@@ -17,6 +19,12 @@ public class CSVReader {
     private final InternalBuffer buffer;
     private ArrayDeque<CSVRecord> records = new ArrayDeque<>();
     private StringBuilder field = new StringBuilder();
+
+    private final char[] lineDelimiter = new char[]{CSVQuoteStrategy.CARRIAGE_RETURN.getChar(), CSVQuoteStrategy.LINE_FEED.getChar()};
+
+    private final char[] fieldSeparator = new char[]{','};
+    private final char quote = '"';
+
     public CSVReader(InternalBuffer buffer) {
         this.buffer = buffer;
     }
@@ -25,6 +33,76 @@ public class CSVReader {
         return records;
     }
 
+
+    /**
+     * 1. read -- 가칭 buffer 읽기 일단은 한글로
+     *      역할 - buffer에서 record 단위로 char[] 생성 이후 new Record 생성 이후 콜백 Thread로
+     */
+
+
+    public void 레코드분리(){
+        while (buffer.readerHasRemaining()){
+            buffer.fillBuffer();
+            레코드파싱();
+        }
+    }
+
+    public void 레코드파싱(){
+        int lineDelimiterIndex = 0;
+        int fieldSeparatorIndex = 0;
+        boolean inQuote = false;
+        char prev = 0 ,cur = 0;
+
+        while (buffer.hasRemaining()){
+            cur = buffer.get();
+
+            if (!inQuote){
+                if (lineDelimiterIndex == lineDelimiter.length - 1){
+                    // buffer의 offset 부터
+                    // position 까지
+                    break;
+                }
+                if (cur == lineDelimiter[lineDelimiterIndex]) {
+                    lineDelimiterIndex++;
+                    continue;
+                }
+
+                if (cur == fieldSeparator[fieldSeparatorIndex]){
+                    fieldSeparatorIndex++;
+                    continue;
+                }
+
+                if (cur == quote){
+                    // 인용구 시작
+                    inQuote = !inQuote;
+                    lineDelimiterIndex = 0;
+                    fieldSeparatorIndex = 0;
+                    continue;
+                }
+            }
+
+            if (inQuote){
+                if (prev == quote && cur == quote){
+                    prev = 0;
+                    continue;
+                }
+
+                if (prev == quote && cur == fieldSeparator[fieldSeparatorIndex]){
+                    fieldSeparatorIndex++;
+                    continue;
+                }
+
+                if (prev == quote && fieldSeparatorIndex == fieldSeparator.length - 1){
+                    inQuote = !inQuote;
+                    prev = 0;
+                    continue;
+                }
+                prev = cur;
+            }
+        }
+    }
+
+    // TODO 아래는 기존
     public void read(){
         if (records.isEmpty()) records.add(new CSVRecord());
         while (buffer.readerHasRemaining()){
@@ -52,7 +130,6 @@ public class CSVReader {
         while (buffer.hasRemaining()){
             cur = buffer.get();
             if ((cur == ',' || cur == '\n') && !inQuote) break;
-
             if (prev == '"' && cur == '"'){
                 buffer.updateOffset();
                 inQuote = !inQuote;
@@ -176,8 +253,6 @@ public class CSVReader {
 
         private char quote;
         private char fieldSeparator;
-        private char[]
-
 
 
         public CSVReader build(Reader reader){
